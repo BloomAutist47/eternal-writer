@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Eternal Writer</title>
+
+  <!-- CSS -->
+  <link href="./.eternal/css/bootstrap.min.css" rel="stylesheet">
+  <link href="./.eternal/css/style.css" rel="stylesheet">
+
+  <!-- JS -->
+  <script src="./.eternal/js/bootstrap.bundle.min.js"></script>
+  <script src="./.eternal/js/markdown-it.js"></script>
+  <script src="./.eternal/js/main.js"></script>
+
+
+  <div id="head-card"></div>
+</head>
+
+<body>
+  <div class="container body-card">
+    <div id="spoiler-button"></div>
+
+    <div id="page-title"></div>
+
+
+    <!-- contenteditable="true" -->
+    <div id="page-content">
+
+      <div id="spoiler"></div>
+      <div id="non-spoiler"></div>
+      
+      <a href="?p=story-a">Test go</a>
+
+    </div>
+  </div>
+
+  <script>
+    // var md = window.markdownit();
+    var directory
+    var idList = []
+      // document.execCommand("defaultParagraphSeparator", false, "p");
+      // document.getElementById("page-content").addEventListener("input", function() {
+      //     const test =  document.getElementById("page-content")
+      //     console.log(test)
+      // }, false);
+
+
+    // Add Site Head
+    getAsset('headbar.html')
+      .then(data => {
+        document.getElementById('head-card').innerHTML = data
+
+        getAsset('eternal.json') // Website Title
+          .then(data => {
+            document.getElementById('project-title').innerText = data['projectTitle']
+          })
+
+        // Add Horizontal Navigation Bar
+        getAsset('navbar.html')
+          .then(data => {
+            document.getElementById('nav-card').innerHTML = data
+          })
+      })
+
+
+
+    // Load Page
+    getAsset('directory.json')
+      .then(data => {
+        directory = data
+        loadPage()
+          .then(() => {
+
+            // Create Spoiler Switch
+            if (page_data.functions.hasOwnProperty('create_spoilers') && page_data.functions.create_spoilers == true) {
+              // try {
+                createSpoiler()
+              // } catch (error) {
+              //   console.log("[Create Page spoiler switch] - \n" + error)
+              // }
+            }
+
+            // Create Page tabs
+            if (page_data.functions.createPageTabs && Object.keys(page_data.functions.createPageTabs).length != 0) {
+
+              for (const tab in page_data.functions.createPageTabs) {
+                try {
+                  let obj = page_data.functions.createPageTabs[tab]
+                  createPageTabs(obj.button, obj.tabs)
+                } catch (error) {
+                  console.log("[Create Page tabs Error] - \n" + error)
+                }
+              }
+            }
+
+            // Create TOC
+            if (page_data.functions.createTOC && Object.keys(page_data.functions.createTOC).length != 0) {
+
+              for (const toc in page_data.functions.createTOC) {
+                try {
+                  let obj = page_data.functions.createTOC[toc]
+                  createTOC(obj.parent_div, obj.toc_div)
+                } catch (error) {
+                  console.log("[Create TOC Error] - \n" + error)
+                }
+              }
+            }
+
+            // Check Profile Box
+            if (page_data.functions.createProfileBox && page_data.functions.createProfileBox.length != 0) {
+
+              for (const profile_id of page_data.functions.createProfileBox) {
+                try {
+                  createProfileBox(profile_id)
+                } catch (error) {
+                  console.log("[Create Profile Box Error] - \n" + error)
+                }
+              }
+            }
+
+
+
+          })
+      })
+  </script>
+</body>
+
+</html>

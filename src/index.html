@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Eternal Writer</title>
+
+  <!-- CSS -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="css/notifications.css" rel="stylesheet"> -->
+  <link href="css/style.css" rel="stylesheet">
+
+  <!-- JS -->
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/main.js"></script>
+
+</head>
+
+<body>
+  <nav id="title-bar" class="container-fluid">
+    <div class="left-nav">
+
+      <div class="noselect"><button type="button" class="btn btn-title btn-title-2">&#x2630;</button> Eternal Writer</div>
+
+
+    </div>
+
+    <div class="right-nav">
+      <button type="button" class="btn btn-title" onclick="minimize()">━</button>
+      <button type="button" class="btn btn-title" onclick="exit()">✕</button>
+      <!-- <button type="button" class="btn btn-title">&#x2630;</button> -->
+    </div>
+  </nav>
+
+  <div class="container start-body noselect center-items">
+
+    <h1>Eternal Writer</h1><span class="version">Version 0.0.1</span>
+    <p class="subHeader">An Offline web-wiki just for you</p>
+    <div class="space-t-2"></div>
+    <hr>
+    <div id="page-content">
+      <div id="page-start">
+        <div class="row">
+          <h2>Start</h2>
+          <p><button class="btn-link" onclick="goToCreate()">New Project</button></p>
+          <p><button class="btn-link" onclick="projectOpen()">Open Project</button></p>
+          <p><button class="btn-link">Clone Git Repository</button></p>
+        </div>
+
+        <div class="row mt-3">
+          <h2>Recent</h2>
+          <div class="recentProjects">
+            <p><a href="#">Project Enderion</a> <span class="projectPath">D:\Writing</span></p>
+            <p><a href="#">Practice</a> <span class="projectPath">C:\Users\Bloom Autist\Documents\Programming\js\practice\src</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-create" class="row" style="display: none;">
+
+        <h2>New Project<button class="btn-arrow" onclick="returnToStart()"> ←</button></h2>
+
+        <div class="space-t-0"></div>
+
+        <div class="row">
+          <div class="col">
+            <p><b>Name</b></p>
+            <p class="subtitle">Pick an awesome name!</p>
+          </div>
+
+          <div class="col center-items">
+            <input id="projectName" type="text" class="input" placeholder="Enter an awesome Eternal name!">
+          </div>
+        </div>
+
+        <div class="space-b-1"></div>
+
+        <div class="row" style="height: 7em;">
+          <div class="col-9">
+            <p><b>Location</b></p>
+            <p class="subtitle">Where Project folder will be created</p>
+            <p id="filePath" class="subtitle" style="display: block;"></p>
+          </div>
+
+          <div class="col-3 start-end-items">
+            <button class="btn btn-color-sub btn-width-long" onclick="selectFolder()">Browse</button>
+          </div>
+        </div>
+
+        <div class="row center-items">
+          <button class="btn btn-color-blue btn-width-long" onclick="projectCreate()">Create</button>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const myNotification = window.createNotification({
+      // options here
+    });
+
+
+  </script>
+
+  <script>
+    function minimize() {
+      window.api.send('toProcess', 'screen:minimize')
+    }
+
+    function exit() {
+      window.api.send('toProcess', 'screen:exit')
+    }
+
+    function projectCreate() {
+      const filePath = document.getElementById('filePath').innerText
+      const name = document.getElementById('projectName').value
+
+      if (name.length == 0) {
+        myNotification({ 
+          title: 'Project Creation Failed',
+          message: 'No project Name entered' 
+        });
+        return
+      }
+
+      if (filePath.length == 0) {
+        myNotification({ 
+          title: 'Project Creation Failed',
+          message: 'No filepath selected' ,
+        });
+        return
+      }
+
+
+
+      window.api.send('toMain', {
+        name: 'project:create',
+        data: {
+          name: name,
+          path: filePath
+        }
+      })
+    }
+
+    function projectOpen() {
+      window.api.send('toMain', {
+        name: 'project:open',
+        data: null
+      })
+    }
+
+    function selectFolder() {
+      window.api.selectFolder()
+        .then(result => {
+          const fp = document.getElementById('filePath')
+          if (result.length > 100) {
+            fp.innerText = result.substr(0, 100) + "...";
+          } else {
+            fp.innerText = result
+          }
+
+          fp.style.display = 'block'
+        })
+    }
+
+    function returnToStart() {
+      document.getElementById("page-create").style.display = 'none'
+      document.getElementById("page-start").style.display = 'block'
+    }
+
+    function goToCreate() {
+      const fp = document.getElementById('filePath')
+      fp.innerText = ''
+      fp.style.display = 'none'
+      document.getElementById("page-create").style.display = 'block'
+      document.getElementById("page-start").style.display = 'none'
+    }
+  </script>
+
+  <!-- <script>
+        window.api.receive("fromMain", (data) => {
+            if (data.name == 'cpu') {
+                console.log('CPU Usage: ' + data.data)
+            }
+        });
+    </script> -->
+</body>
+
+</html>

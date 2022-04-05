@@ -1,0 +1,110 @@
+// Variables
+$fontFamily: 'Segoe UI';
+$fontColor: whitesmoke;
+$fontSubColor: rgb(188, 188, 188);
+$fontColor2: #212121;
+
+// $subColor: #3794ff;
+// $subColorHighlight: #5ba6fc;  
+$subColor: #44fc75;
+$subColorHighlight: #6cfb92;
+$mainBackground: #212121;
+$subBackground: #1a1a1a;
+
+// Imports 
+@import './default';
+@import './startmenu';
+@import './remove';
+@import './utility';
+@import './notifications';
+
+// CSS
+#title-bar {
+    width: 100%;
+    height: 1em;
+    min-height: 1.5em;
+    background-color: $subBackground;
+
+    margin: 0em !important;
+    padding: 0em;
+    z-index: 10;
+
+    display: flex;
+    justify-content: space-between; 
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+
+    .left-nav {
+        font-weight: 400;
+    }
+
+    .right-nav {
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-title {
+        @include button();
+        color: $mainBackground;
+        background-color: $subColor;
+        padding: 0em 0.8em;
+        border-radius: 0em;
+        z-index: 10;
+        width: 2.5em;
+        -webkit-app-region: no-drag;
+        &:hover {
+            border-radius: 0em;
+            background-color: $mainBackground;
+            color: $fontColor;
+        }
+        
+    }
+
+    .btn-title-2 {
+        color: $fontColor;
+        background-color: transparent;
+        padding: 0em !important;
+        padding-bottom: 0.2em !important;
+        margin: 0em;
+        vertical-align: middle;
+        width: 2em;
+        // display: grid;
+        // place-items: center;
+    }
+}
+
+
+.input {
+    background-color: $subBackground;
+    color: $fontColor;
+    padding: 0.2em 0.5em;
+    width: 16em;
+    border: none;
+    border-radius: 0.1em;
+    margin-left: 0.5em;
+    font-family: $fontFamily;
+    font-weight: 300;
+    &:focus {
+        @include removeSelect();
+    }
+    &::selection {
+        color: $fontColor;
+        background: $subColor;
+    }
+    &:focus-within {
+        // background: #ff8;
+        color: $subColor;
+      }
+}
+
+.subtitle {
+    font-size: medium;
+    color: $fontSubColor;
+}
+
+
+.small {
+    font-size: medium;
+    margin-left: 0.5em;
+}

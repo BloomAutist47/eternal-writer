@@ -1,0 +1,54 @@
+html {
+    background-color: $mainBackground;
+}
+
+body {
+    background-color: $mainBackground;
+    color: $fontColor;
+    font-family: $fontFamily;
+    font-weight: 100;
+
+    scrollbar-width: thin;
+    scrollbar-color: $subColor $subBackground;
+    &::-webkit-scrollbar {
+        width: 11px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: $subColor ;
+        border-radius: 6px;
+        border: 3px solid $subBackground;
+      }
+}
+
+
+
+a {
+    color: $subColor;
+    text-decoration: none;
+    &:hover {
+        color: $fontSubColor;
+        border-radius: 0.1em;
+    }
+}
+
+button {
+    color: $subColor;
+    text-decoration: none;
+    &:hover {
+        color: $fontSubColor;
+        border-radius: 0.1em;
+    }
+}
+
+
+img, a {
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+h1, h2 {
+    font-weight: 300;
+    margin: 0em;
+}
+
+hr { color: gray; border-style: inset; width: 100%;}

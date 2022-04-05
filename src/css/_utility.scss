@@ -1,0 +1,96 @@
+
+// Spaces
+.space-b-1 {
+    margin-bottom: 1em;
+}
+.space-t-0 {
+    margin-top: 0.3em;
+}
+.space-t-1 {
+    margin-top: 0.5em;
+}
+
+.space-t-2 {
+    margin-top: 1em;
+}
+
+
+// Positioning
+.center-items {
+    display: grid;
+    place-items: center;
+}
+
+.end-items {
+    display: grid;
+    place-items: end;
+}
+
+.start-end-items {
+    display: grid;
+    place-items: start end;
+}
+
+// -webkit-box-shadow:inset 0px 0px 0px 10px red;
+// -moz-box-shadow:inset 0px 0px 0px 10px red;
+// box-shadow:inset 0px 0px 0px 10px red;
+// Buttons
+@mixin button {
+    border-radius: 0.5em;
+    font-weight: 400 !important;
+
+    
+    &:hover {
+        border-radius: 0.5em;
+        font-weight: 400;
+        
+    }
+}
+
+
+
+.btn-color-blue {
+    @include button();
+    color: $mainBackground;
+    background-color: $subColor;
+
+    &:hover {
+
+        color: $mainBackground;
+        background-color: $subColorHighlight;
+
+    }
+}
+
+.btn-color-sub {
+    @include button();
+    color: $fontColor;
+    background-color: $subBackground;
+    
+    &:hover {
+        background-color: $subColor;
+    }
+}
+
+.btn-width-long {
+    width: 6em;
+}
+
+.btn-arrow {
+    background-color: transparent;
+    border: 0em;
+}
+
+.btn-link {
+    font-weight: 100;
+    background-color: transparent;
+    border: 0em;
+    margin: 0em;
+    padding: 0em;
+    color: $subColor;
+    text-decoration: none;
+    &:hover {
+        color: $fontSubColor;
+        border-radius: 0.1em;
+    }
+}
