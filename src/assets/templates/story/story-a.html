@@ -1,35 +1,25 @@
 <!-- File Data -->
 <script>
-  window.page_data = {
+  window.pageData = {
     title: "Ethan Morales",
     description: "Stuff stuff",
     functions: {
-      create_spoilers: true,
-      createTOC: {
-        0: {
-          parent_div: 'non-spoiler',
-          toc_div: 'toc-non-spoiler'
+      createSpoilers: true,
+      createProfileBox: true,      
+      createPageTabs: [
+        {
+          contentArea: "spoiler",
+          tabs: [
+            {name: "Overview", id: "spoiler-overview"}, 
+            {name: "Relationship", id: "spoiler-relationships"}
+          ]
         },
-        1: {
-          parent_div: 'spoiler',
-          toc_div: 'toc-spoiler'
-        }
-      },
-      createProfileBox: [
-        'profile-box-nonspoiler',
-        'profile-box-spoiler',
-      ],
-      createPageTabs: {
-        0: {
-          button: "page-tab-button",
-          tabs: ["Overview", "Relationships"]
-        }
-      }
+      ]
     }
   }
 
-  window.profile_data = {
-    'profile-box-nonspoiler': {
+  window.profileData = {
+    'non-spoiler-overview': {
       'Title': 'Ethan Morales',
       'Image': {
         "Original Art": "assets/images/Ethan-Morales.png",
@@ -73,7 +63,7 @@
       }
 
     },
-    'profile-box-spoiler': {
+    'spoiler-overview': {
       'Title': 'Ethan Morales',
       'Image': {
         "Original Art": "assets/images/Ethan-Morales.png",
@@ -143,55 +133,55 @@
 
 
 <div id="non-spoiler">
-  <div id="profile-box-nonspoiler"></div>
-  Morales is the Main Protagonist of the novel "The Birth of a Hero" and the **the central** point of the story. He is a student studying in U.H.A. and is part of E-Class. He has the power to create physical objects using his body fats which he apparently "Awakened" randomly in the past.
-  
-  
-  <div id="toc-non-spoiler"></div>
 
-  # Appearance
-  Ethan is a Desterian Teenager. Like most Desterian, he has dark hair and light beige skin. *His* eyes are orange-red, inherited from his mother and he has a tall build, inherited from his dad. His eyebrows are thin like his mother and his nose is straight from his father's. His hair is kept slightly long, giving him a pair of bangs on his forehead.
+  <div id="non-spoiler-overview" class="page-tab">
 
-  While Ethan is always seen wearing glasses, he does not have a bad eyesight. Rather, he wears his glasses as a convenient computer and to help enhance his ability. He does not like contact lens since he's too lazy to wear those.
+    Morales is the Main Protagonist of the novel "The Birth of a Hero" and the **the central** point of the story. He is a student studying in U.H.A. and is part of E-Class. He has the power to create physical objects using his body fats which he apparently "Awakened" randomly in the past.
+    
+    [[toc]]
 
-  When not in school, he always wears a dark, baggy sweater and a pair of dark pants. When he goes outside, he wears a dark track suit with orange-red stripes.
+    # Appearance
+    Ethan is a Desterian Teenager. Like most Desterian, he has dark hair and light beige skin. *His* eyes are orange-red, inherited from his mother and he has a tall build, inherited from his dad. His eyebrows are thin like his mother and his nose is straight from his father's. His hair is kept slightly long, giving him a pair of bangs on his forehead.
 
-  # Personality
-  Ethan first appeared to have a stoic and quiet personality.
-  However, his true personality eventually appears, revealing a chaotic and mischievous person. He does not like rules and laws, preferring to do as he pleases. Although he do respect the law, up until its convenient to him, that is.
+    While Ethan is always seen wearing glasses, he does not have a bad eyesight. Rather, he wears his glasses as a convenient computer and to help enhance his ability. He does not like contact lens since he's too lazy to wear those.
 
-  Ethan's perspective on what is 'Right' is very skewed from the norm, preferring to achieve pragmatic results regardless of the means. Sometimes, things that are really dangerous and blatantly wrong to the average person is seen by Ethan as something 'obvious'. This caused his friends and classmates to view him as an unhinged sociopath.
-  However, this kind of Morality is not unique to Ethan as Kevin sometimes displays them, albeit to a lesser degree, clearly influenced by the two of them grewing up pratically together.
+    When not in school, he always wears a dark, baggy sweater and a pair of dark pants. When he goes outside, he wears a dark track suit with orange-red stripes.
 
-  # Ability
-  ## Candlefire
-  The ability to create a small candle fire in his palm
+    # Personality
+    Ethan first appeared to have a stoic and quiet personality.
+    However, his true personality eventually appears, revealing a chaotic and mischievous person. He does not like rules and laws, preferring to do as he pleases. Although he do respect the law, up until its convenient to him, that is.
 
-  ## Creation 
-  The ability to turn body fats into a any physical objects. The following is the current limits.
-  * The user's understanding of molecular and atomic structure.
-  * Amount of fats in his body
-  * Brain Processing Power
-  * Size of Creation no more than his body's surface area
+    Ethan's perspective on what is 'Right' is very skewed from the norm, preferring to achieve pragmatic results regardless of the means. Sometimes, things that are really dangerous and blatantly wrong to the average person is seen by Ethan as something 'obvious'. This caused his friends and classmates to view him as an unhinged sociopath.
+    However, this kind of Morality is not unique to Ethan as Kevin sometimes displays them, albeit to a lesser degree, clearly influenced by the two of them grewing up pratically together.
 
-  ## Fire Resistance
-  Ability to resist intense heat. Inherited from his mother.
+    # Ability
+    ## Candlefire
+    The ability to create a small candle fire in his palm
 
+    ## Creation 
+    The ability to turn body fats into a any physical objects. The following is the current limits.
+    * The user's understanding of molecular and atomic structure.
+    * Amount of fats in his body
+    * Brain Processing Power
+    * Size of Creation no more than his body's surface area
+
+    ## Fire Resistance
+    Ability to resist intense heat. Inherited from his mother.
+  </div>
 </div>
 
 
 <div id="spoiler">
 
-  <div id="page-tab-button"></div>
-  <div id="Overview">
-    <div id="profile-box-spoiler"></div>
+  <div id="spoiler-overview" class="page-tab">
+    
     Ethan Morales is the Main Protagonist of the novel "The Birth of a Hero" and the the central point of the story. He is a student studying in U.H.A. and is part of E-Class.
 
     He and his family are Desterian Immigrants who migrated to Arlika in order to seek a better life. The first six years of his life was spent in Desteria, witnessing the cruelty of drug cartels and the ghetto, caused a life-long influenced on Ethan's psyche that even he didn't knew he had.
 
     As a child, he always wanted to become a hero because of the stories that his mother told him. She taught in him the virtues of a Hero and what it means to be good. As a result, he grew up wanting to be one. He trained his abilities for most of his days and even going so far as becoming a vigilante with his best friend Kevin and Vanessa, albeit only fighting petty crimes like thievery, mugging, and bullying. But his motivation later became sinister when an accident led to him having to choose which one of his friend he had to sacrifice, followed by the destruction of the town they were in at the time, permanently scarring Ethan's mind and turning him into a sociopath.
 
-    <div id="toc-spoiler"></div>
+    [[toc]]
     # Appearance
     Ethan is a Desterian Teenager. Like most Desterian, he has dark hair and light beige skin. His eyes are orange-red, inherited from his mother and he has a tall build, inherited from his dad. His eyebrows are thin like his mother and his nose is straight from his father's. His hair is kept slightly long, giving him a pair of bangs on his forehead.
 
@@ -242,7 +232,7 @@
 
   </div>
 
-  <div id="Relationships">
+  <div id="spoiler-relationships" class="page-tab">
     # Relationships
   </div>
 

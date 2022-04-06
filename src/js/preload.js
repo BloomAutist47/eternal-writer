@@ -22,5 +22,6 @@ contextBridge.exposeInMainWorld(
             }
         },
         selectFolder: () => ipcRenderer.invoke('dialog:openDirectory'),
+        isElectron: () => ipcRenderer.invoke('electronCheck'),
     }
 );

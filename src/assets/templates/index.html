@@ -14,11 +14,105 @@
   <script src="./.eternal/js/markdown-it.js"></script>
   <script src="./.eternal/js/main.js"></script>
 
-
+  <script src="./.eternal/js/simplemde.min.js"></script>
   <div id="head-card"></div>
 </head>
 
 <body>
+
+  <div id="editor">
+    <button id="editorBtn" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editorModal">
+      Launch demo modal
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editorModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title" id="exampleModalLabel">Page Editor</h1>
+            <div>
+              <button type="button" class="btn btn-primary">Save changes</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+            </div>
+            <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+          </div>
+          <div class="modal-body container">
+            <div id="editorHeader" class="row">
+
+              <div id="editorHeaderLeft" class="col-9">
+
+                <!-- Page Title -->
+                <div class="input-group mb-3">
+                  <span class="input-group-text" id="basic-addon1">Page Title</span>
+                  <input type="text" class="form-control" placeholder="Awesome page title!" aria-label="Awesome page title!" aria-describedby="basic-addon1">
+                </div>
+                <!-- Parent Page -->
+                <div class="input-group mb-3">
+                  <span class="input-group-text" id="basic-addon1">Parent</span>
+                  <input type="text" class="form-control" placeholder="Set parent for creating breadcrumbs" aria-label="Set parent for creating breadcrumbs" aria-describedby="basic-addon1">
+                </div>
+
+                <!-- Tags Page -->
+                <div class="input-group mb-3">
+                  <span class="input-group-text" id="basic-addon1">Tags</span>
+                  <input type="text" class="form-control" placeholder="Tag1 Tag2 Tag3" aria-label="Tag1 Tag2 Tag3" aria-describedby="basic-addon1">
+                </div>
+
+              </div>
+
+              <div id="editorHeaderRight" class="col-3">
+                <button id="editorProfileBox" type="button" class="btn btn-primary">Profile Box</button>
+                <button id="editorProfileBox" type="button" class="btn btn-primary">Add Tabs</button>
+                <!-- <button id="editorProfileBox" type="button" class="btn btn-primary">Add Collapsibles</button> -->
+                <div class="form-check cen">
+                  <input class="form-check-input input-primary" type="checkbox" value="" id="flexCheckDefault" onchange="showSpoilers()">
+                  <label class="form-check-label label-primary" for="flexCheckDefault">Enable Spoilers</label>
+
+
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Content Area -->
+            <div id="editor-content" class="row">
+
+
+
+              <div class="editor-contents">
+                <h2>Page Content</h2>
+
+                <div id="editor-content-spoiler-tab-btns"></div>
+
+                <div id="editor-nonspoiler">
+                  <div id="editor-nonspoiler-tab-btns"></div>
+                  <div class="editor-content-tab">
+
+                    <textarea id="editor-nonspoiler-textarea"></textarea>
+                  </div>
+
+                </div>
+
+                <div id="editor-spoiler">
+                  <div id="editor-spoiler-tab-btns"></div>
+                  <div class="editor-content-tab">
+                    <textarea id="editor-spoiler-textarea"></textarea>
+                  </div>
+
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="container body-card">
     <div id="spoiler-button"></div>
 
@@ -30,22 +124,15 @@
 
       <div id="spoiler"></div>
       <div id="non-spoiler"></div>
-      
+
       <a href="?p=story-a">Test go</a>
 
     </div>
   </div>
 
   <script>
-    // var md = window.markdownit();
     var directory
     var idList = []
-      // document.execCommand("defaultParagraphSeparator", false, "p");
-      // document.getElementById("page-content").addEventListener("input", function() {
-      //     const test =  document.getElementById("page-content")
-      //     console.log(test)
-      // }, false);
-
 
     // Add Site Head
     getAsset('headbar.html')
@@ -65,66 +152,120 @@
       })
 
 
-
     // Load Page
     getAsset('directory.json')
       .then(data => {
+
         directory = data
         loadPage()
           .then(() => {
 
+            createTOC()
+            
             // Create Spoiler Switch
-            if (page_data.functions.hasOwnProperty('create_spoilers') && page_data.functions.create_spoilers == true) {
-              // try {
-                createSpoiler()
-              // } catch (error) {
-              //   console.log("[Create Page spoiler switch] - \n" + error)
-              // }
+            if (pageData.functions.hasOwnProperty('createSpoilers') && pageData.functions.createSpoilers == true) {
+              createSpoiler()
             }
 
             // Create Page tabs
-            if (page_data.functions.createPageTabs && Object.keys(page_data.functions.createPageTabs).length != 0) {
-
-              for (const tab in page_data.functions.createPageTabs) {
-                try {
-                  let obj = page_data.functions.createPageTabs[tab]
-                  createPageTabs(obj.button, obj.tabs)
-                } catch (error) {
-                  console.log("[Create Page tabs Error] - \n" + error)
-                }
-              }
-            }
-
-            // Create TOC
-            if (page_data.functions.createTOC && Object.keys(page_data.functions.createTOC).length != 0) {
-
-              for (const toc in page_data.functions.createTOC) {
-                try {
-                  let obj = page_data.functions.createTOC[toc]
-                  createTOC(obj.parent_div, obj.toc_div)
-                } catch (error) {
-                  console.log("[Create TOC Error] - \n" + error)
-                }
+            if (pageData.functions.createPageTabs && Object.keys(pageData.functions.createPageTabs).length != 0) {
+              for (const obj of pageData.functions.createPageTabs) {
+                createPageContentTabs(obj.contentArea, obj.tabs)
               }
             }
 
             // Check Profile Box
-            if (page_data.functions.createProfileBox && page_data.functions.createProfileBox.length != 0) {
-
-              for (const profile_id of page_data.functions.createProfileBox) {
-                try {
-                  createProfileBox(profile_id)
-                } catch (error) {
-                  console.log("[Create Profile Box Error] - \n" + error)
-                }
+            if (pageData.functions.hasOwnProperty('createProfileBox') && pageData.functions.createProfileBox == true) {
+              if (typeof profileData !== 'undefined' && Object.keys(profileData).length != 0) {
+                createProfileBox(profileData)
               }
             }
-
-
-
           })
       })
   </script>
+
+
+
+
+
+
+
+  <script>
+    createPageTabs('editor-content-spoiler-tab-btns', [{
+        name: 'Non-spoiler Page',
+        id: 'editor-nonspoiler'
+      }, {
+        name: 'Spoiler Page',
+        id: 'editor-spoiler'
+      }]
+
+
+    );
+    showSpoilers()
+
+    function showSpoilers() {
+      const btns = document.getElementById('editor-content-spoiler-tab-btns')
+      if (btns.style.display == "none") {
+        btns.style.display = "block";
+        // document.getElementById('editor-nonspoiler').style.display = "block";
+        document.getElementById('editor-spoiler').style.display = "block";
+      } else {
+        btns.style.display = "none";
+        const nonspoilerbtn = btns.getElementsByTagName('Button')[0].click()
+          // document.getElementById('editor-nonspoiler').style.display = "block";
+        document.getElementById('editor-spoiler').style.display = "none";
+      }
+
+    }
+  </script>
+
+
+
+
+
+  <script>
+    // const tx = document.getElementsByTagName("textarea");
+    // for (let i = 0; i < tx.length; i++) {
+    //   tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
+    //   tx[i].addEventListener("input", OnInput, false);
+    // }
+
+    // function OnInput() {
+    //   this.style.height = "auto";
+    //   this.style.height = (this.scrollHeight) + "px";
+    // }
+
+    // document.getElementById("editor-nonspoiler-textarea").addEventListener("input", function() {
+    //   highlight()
+    // }, false);
+
+    // function highlight() {
+    //   const textarea = document.getElementById("editor-nonspoiler-textarea")
+    //   const lines = textarea.innerText.trim().split("\n")
+    //   let newValue = ""
+
+    //   for (let line of lines) {
+
+    //     const hres = line.match(/(#+)\s/);
+
+    //     if (hres) {
+    //       line = line.replace(hres[0], "").trim()
+    //       line = `<span class="hl-yellow">${line}</span>`
+    //     }
+
+    //     newValue += line + "\n"
+
+    //   }
+
+    //   textarea.innerText = newValue
+    // }
+
+    // window.api.isElectron()
+    //   .then(result => {
+    //     console.log("whasds")
+    //   })
+  </script>
+
 </body>
 
 </html>

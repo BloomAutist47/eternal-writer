@@ -1,90 +1,130 @@
-// Variables 
+// Variables  
 $fontFamily: 'Helvetica';
-
 $FontColor1: #3a3a3a;
 $FontColor2: whitesmoke;
-
 $FontShadow: #212121;
-
 $Color1: #0d6efd;
 $Color2: #6cfb92;
-
+$Color1Dark: #0e59ca;
 $BG: #E7E7E2;
 $Card: #FFFFFF;
 $BG2: #F7F7F7;
-
 $ToolTipBG: #eb4034;
 $ToolTipColor: #ffffff;
-
-// Imports
+$BorderColor: #ced4da;
+// Imports  
 @import './navbar';
 @import './spoiler';
 @import './default';
 @import './toc';
 @import './profilebox';
+@import './editor';
+@import './simplemde';
 
-// CSSs
+// CSS 
 @mixin center {
-    display: grid;
-    place-items: center;
+  display: grid;
+  place-items: center;
+}
+
+@mixin removeSelect {
+  outline: 0px !important;
+  -webkit-appearance: none;
+  box-shadow: none !important;
 }
 
 #page-title {
-    h1 {
-        font-size: 2.5em;
-        font-weight: 400;
-    }
+  h1 {
+    font-size: 2.5em;
+    font-weight: 400;
+  }
 }
 
-
 body {
-    @include center();
-    background-color: $BG;
+  @include center();
+  background-color: $BG;
+  color: $FontColor1;
+  font-family: $fontFamily;
+  font-weight: 400;
+  font-size: small;
+  .body-card {
+    width: 60em;
+    background-color: $Card;
     color: $FontColor1;
-    font-family: $fontFamily;
-    font-weight: 400;
-    font-size: small;
-    .body-card {
-        width: 60em;
-        background-color: $Card;
-        color: $FontColor1;
-        border-radius: 0.5em;
-        padding: 2em 3em;
-        margin: 0em 1em 4em 1em;
-
-        hr {
-            margin: 0em 0em 0.3em 0em;
-        }
+    border-radius: 0.5em;
+    padding: 2em 3em;
+    margin: 0em 1em 4em 1em;
+    hr {
+      margin: 0em 0em 0.3em 0em;
     }
+  }
 }
 
 #head-card {
-    @include center();
-    margin: 6em 0em 3em 0em;
-
-    h1 {
-        color: $FontColor1;
-        text-shadow: 1px 1px 2px $FontShadow;
-    }
-    // Website Title
-    #project-title {
-        font-size: 3.4em;
-    }
+  @include center();
+  margin: 6em 0em 3em 0em;
+  h1 {
+    color: $FontColor1;
+    text-shadow: 1px 1px 2px $FontShadow;
+  }
+  // Website Title
+  #project-title {
+    font-size: 3.4em;
+  }
 }
 
 #nav-card {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 .hide {
-    display: none;
+  display: none;
 }
 
 .space {
-    margin-bottom: 0.5em !important;
+  margin-bottom: 0.5em !important;
 }
 
 .bold {
-    font-weight: bold;
+  font-weight: bold;
 }
-  
+
+// Primary button used   
+.btn {
+  @include removeSelect();
+  cursor: pointer !important;
+}
+
+.btn-primary {
+  font-size: 1rem;
+  background-color: $Color1;
+  color: $FontColor2;
+  border: 0em;
+  cursor: pointer !important;
+  &:hover {
+    background-color: $Color1Dark;
+    cursor: pointer !important;
+  }
+}
+
+.input-primary {
+  @include removeSelect();
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(1);
+  /* IE */
+  -moz-transform: scale(1);
+  /* FF */
+  -webkit-transform: scale(1);
+  /* Safari and Chrome */
+  -o-transform: scale(1);
+  /* Opera */
+  transform: scale(1);
+  padding: 10px;
+  margin: 0em;
+  margin-right: 0.2em;
+}
+
+.label-primary {
+  font-size: 1rem;
+  vertical-align: middle;
+}

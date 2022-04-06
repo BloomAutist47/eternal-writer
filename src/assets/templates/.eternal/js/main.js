@@ -1,3 +1,5 @@
+var htmlHeight = 0
+
 function getAsset(filename) {
   let raw = filename.split(".")
   const filetype = raw[raw.length - 1]
@@ -46,7 +48,7 @@ function loadPage() {
         .then(data => {
           idList = []
           const dummy = document.createElement("div")
-          dummy.innerHTML = data
+          dummy.innerHTML = data.trim()
 
           var scripts = dummy.querySelectorAll("script");
           for (let script of scripts) {
@@ -54,15 +56,36 @@ function loadPage() {
               eval(script.innerText);
             } else if (script.src) {
               fetch(script.src).then(data => {
-                data.text().then(r => { eval(r); })
+                data.text().then(r => {
+                  eval(r);
+                })
               });
             }
             // To not repeat the element
             script.parentNode.removeChild(script);
           }
 
+
           const filedata = data.split('<!-- File Content -->')[1].trim()
           const processedFiledata = renderText(filedata)
+
+          // Set editor textarea
+          // let textarea = document.getElementById('editor-nonspoiler-textarea')
+          // textarea.value = filedata
+          var simplemde = new SimpleMDE({
+            element: document.getElementById("editor-nonspoiler-textarea"),
+            autofocus: true,
+            initialValue: filedata,
+            hideIcons: [
+              "guide",
+              "side-by-side",
+              "preview"
+            ],
+            forceSync: true,
+            autofocus: true
+              // promptURLs: true
+          });
+          // simplemde.value(filedata);
 
           document.getElementById('page-content').innerHTML = processedFiledata
           document.getElementById('page-title').innerHTML = `<h1>${directory[page]["name"]}</h1>`
@@ -76,6 +99,7 @@ function loadPage() {
 
 function renderText(filedata) {
   const lines = filedata.split("\n")
+  htmlHeight = lines.length
   let htmlContent = ''
 
   for (const line of lines) {
@@ -128,12 +152,12 @@ function renderWordItalic(value) {
 
 function openSpoilers() {
   if (localStorage["theSongOfEnderion_isSpoiler"]) {
-      const spoiler_div = document.getElementById("spoiler")
-      const non_spoiler_div = document.getElementById("non-spoiler")
-  
-      spoiler_div.style.display = "block"
-      non_spoiler_div.style.display = "none"
-      localStorage["theSongOfEnderion_isSpoiler"] = true;
+    const spoiler_div = document.getElementById("spoiler")
+    const non_spoiler_div = document.getElementById("non-spoiler")
+
+    spoiler_div.style.display = "block"
+    non_spoiler_div.style.display = "none"
+    localStorage["theSongOfEnderion_isSpoiler"] = true;
   }
 
 }
@@ -143,13 +167,13 @@ function toggleSpoilers() {
   const non_spoiler_div = document.getElementById("non-spoiler")
 
   if (spoiler_div.style.display == "none") {
-      spoiler_div.style.display = "block"
-      non_spoiler_div.style.display = "none"
-      localStorage["theSongOfEnderion_isSpoiler"] = true;
+    spoiler_div.style.display = "block"
+    non_spoiler_div.style.display = "none"
+    localStorage["theSongOfEnderion_isSpoiler"] = true;
   } else {
-      spoiler_div.style.display = "none"
-      non_spoiler_div.style.display = "block"
-      localStorage["theSongOfEnderion_isSpoiler"] = false;
+    spoiler_div.style.display = "none"
+    non_spoiler_div.style.display = "block"
+    localStorage["theSongOfEnderion_isSpoiler"] = false;
   }
 
   console.log(localStorage["theSongOfEnderion_isSpoiler"])
@@ -166,14 +190,14 @@ function createSpoiler() {
     </label>
     <span class="tooltipStyletext">Enables Spoilers!</span>`
 
-    if (localStorage["theSongOfEnderion_isSpoiler"] == 'true') {
-      spoilerDiv.getElementsByTagName('input')[0].checked = true;
-      // openSpoilers()
-      document.getElementById("non-spoiler").style.display = "none"
-      document.getElementById("spoiler").style.display = "block"
+  if (localStorage["theSongOfEnderion_isSpoiler"] == 'true') {
+    spoilerDiv.getElementsByTagName('input')[0].checked = true;
+    // openSpoilers()
+    document.getElementById("non-spoiler").style.display = "none"
+    document.getElementById("spoiler").style.display = "block"
   } else {
-      document.getElementById("non-spoiler").style.display = "block"
-      document.getElementById("spoiler").style.display = "none"
+    document.getElementById("non-spoiler").style.display = "block"
+    document.getElementById("spoiler").style.display = "none"
   }
 
 
@@ -182,164 +206,211 @@ function createSpoiler() {
 
 
 // TABLE OF CONTENT
-function createTOC(content_div, toc_element) {
+function createTOC() {
 
-  const toc = document.getElementById(toc_element);
-  const headers = document.getElementById(content_div).getElementsByClassName("h");
+  const divs = document.getElementsByClassName("page-tab")
+  for (const contdiv of divs) {
 
-  if (toc == null) {
-    alert(`Table of Content Error: \nthe div with "${toc_element}" id is missing`);
-    return;
+    let divText = contdiv.innerHTML.trim()
+
+    if (divText == '') continue
+    if (!divText.includes("[[toc]]")) continue
+
+    let headers = contdiv.getElementsByClassName("h");
+    let toc = `<div class="toc"><p><b>Table of Contents</b></p>`
+    let alreadyDone = false
+    for (const head of headers) {
+
+      // Add ID
+      if (head.id != '') {
+        alreadyDone = true;
+        break;
+      }
+
+      head.id = head.textContent.replace(" ", "_").toLocaleLowerCase();
+
+      // Create links
+      toc += `<a href="#${head.id}" class="toc-${head.tagName}">${head.innerText}</a><br>\n`
+
+      // Add Arrow Up
+      head.insertAdjacentHTML('beforeend', `<a href="#" class="arrow-up">↑</a>`);
+    }
+
+    if (alreadyDone) continue
+    contdiv.innerHTML = contdiv.innerHTML.replace("[[toc]]", toc + '</div>\n');
   }
 
-  toc.classList.add("toc");
+  // const toc = document.getElementById(toc_element);
+  // const headers = document.getElementById(content_div).getElementsByClassName("h");
 
-  // Adds Title
-  toc.insertAdjacentHTML('beforeend', `<p><b>Table of Contents</b></p>`);
 
-  for (const head of headers) {
 
-    // Add ID
-    head.id = head.textContent.replace(" ", "_").toLocaleLowerCase();
+  // toc.classList.add("toc");
 
-    // Create links
-    toc.insertAdjacentHTML('beforeend', `
-        <a href="#${head.id}" class="toc-${head.tagName}">${head.innerText}</a>`);
+  // // Adds Title
+  // toc.insertAdjacentHTML('beforeend', `<p><b>Table of Contents</b></p>`);
 
-    // Add Arrow Up
-    head.insertAdjacentHTML('beforeend', `<a href="#" class="arrow-up">↑</a>`);
+  // for (const head of headers) {
 
-    // Add links to toc
-    toc.appendChild(document.createElement('br'));
-  }
+  //   // Add ID
+  //   head.id = head.textContent.replace(" ", "_").toLocaleLowerCase();
+
+  //   // Create links
+  //   toc.insertAdjacentHTML('beforeend', `
+  //       <a href="#${head.id}" class="toc-${head.tagName}">${head.innerText}</a>`);
+
+  //   // Add Arrow Up
+  //   head.insertAdjacentHTML('beforeend', `<a href="#" class="arrow-up">↑</a>`);
+
+  //   // Add links to toc
+  //   toc.appendChild(document.createElement('br'));
+  // }
 }
 
 
 // PROFILE BOX
-function createProfileBox(profile_id) {
-  const profle_obj = profile_data[profile_id]
-  const div = document.getElementById(profile_id)
+function createProfileBox(_profileData) {
 
-  // Validation
-  if (div == null) {
-    alert(`Profile Box Error: The div with "${profile_id}" id is missing`)
-    return
-  }
-  div.classList.add("float-end", "profile-box")
-
-  // Create Title
-  div.insertAdjacentHTML('beforeend', `<span class="profile-title bold">${profle_obj['Title']}</span>`)
-
-  // Create Image Tabs
-  if (profle_obj.hasOwnProperty('Image')) {
-
-    // Create ids
-    let btn_group_id = profile_id + "-" + makeid(8)
-    let btn_content_id = makeid(8)
-
-    let image_ids = {}
-
-    // Create Button Group
-    let btn_group = document.createElement('div')
-    btn_group.id = btn_group_id
-
-    div.appendChild(btn_group)
-
-    // Create Buttons and Images
-    let first = true
-    for (const image in profle_obj['Image']) {
-
-      // Create Buttons
-      image_ids[image] = image.replace(" ", "_").toLocaleLowerCase() + "-" + makeid(8)
-
-      let btn_tab = document.createElement("button")
-      btn_tab.classList.add("btn", "profile-image-btn")
-      btn_tab.innerText = image
-      btn_tab.setAttribute("onclick", `openTab(this, '${image_ids[image]}', '${btn_content_id}', '${btn_group_id}')`)
-
-      btn_group.appendChild(btn_tab)
+  for (const pageTabId in _profileData) {
 
 
-      // Add active status if first one
-      let display_style = "none"
-      if (first) {
-        btn_tab.classList.add("profile-tab-active")
-        display_style = "block"
-        first = false;
+    const profle_obj = _profileData[pageTabId]
+    const div = document.createElement('div')
+    div.id = pageTabId + "-profilebox"
+
+    // Validation
+    if (div == null) {
+      alert(`Profile Box Error: The div with "${profile_id}" id is missing`)
+      return
+    }
+    div.classList.add("float-end", "profile-box")
+
+    // Create Title
+    div.insertAdjacentHTML('beforeend', `<span class="profile-title bold">${profle_obj['Title']}</span>`)
+
+    // Create Image Tabs
+    if (profle_obj.hasOwnProperty('Image')) {
+
+      // Create ids
+      let btn_group_id = div.id + "-" + makeid(8)
+      let btn_content_id = makeid(8)
+
+      let image_ids = {}
+
+      // Create Button Group
+      let btn_group = document.createElement('div')
+      btn_group.id = btn_group_id
+
+      div.appendChild(btn_group)
+
+      // Create Buttons and Images
+      let first = true
+      for (const image in profle_obj['Image']) {
+
+        // Create Buttons
+        image_ids[image] = image.replace(" ", "_").toLocaleLowerCase() + "-" + makeid(8)
+
+        let btn_tab = document.createElement("button")
+        btn_tab.classList.add("btn", "profile-image-btn")
+        btn_tab.innerText = image
+        btn_tab.setAttribute("onclick", `openTab(this, '${image_ids[image]}', '${btn_content_id}', '${btn_group_id}')`)
+
+        btn_group.appendChild(btn_tab)
+
+
+        // Add active status if first one
+        let display_style = "none"
+        if (first) {
+          btn_tab.classList.add("tab-active")
+          display_style = "block"
+          first = false;
+        }
+
+        // Create Image Div
+        div.insertAdjacentHTML('beforeend', `
+              <div id="${image_ids[image]}" class="green-box profile-image ${btn_content_id}" style="display: ${display_style};">
+                <img src="${profle_obj['Image'][image]}" class="img-fluid mx-auto d-block" alt="...">
+              </div>`)
       }
 
-      // Create Image Div
-      div.insertAdjacentHTML('beforeend', `
-            <div id="${image_ids[image]}" class="green-box profile-image ${btn_content_id}" style="display: ${display_style};">
-              <img src="${profle_obj['Image'][image]}" class="img-fluid mx-auto d-block" alt="...">
-            </div>`)
     }
 
+    // Create Table
+    const table = document.createElement("table")
+    table.id = "profile-table"
+    table.classList.add("table")
 
-  }
+    const tbody = document.createElement("tbody")
 
-  // Create Table
-  const table = document.createElement("table")
-  table.id = "profile-table"
-  table.classList.add("table")
+    for (const category in profle_obj['Content']) {
 
-  const tbody = document.createElement("tbody")
+      // Category Name
+      if (category != "Desc") {
+        tbody.insertAdjacentHTML('beforeend', `<tr><td class="bold profile-category" colspan="2">${category}</td></tr>`)
+      }
 
-  for (const category in profle_obj['Content']) {
+      // Category Row-Cell values
+      for (const type in profle_obj['Content'][category]) {
+        if (category == "Image") continue
+        const tr = document.createElement("tr")
 
-    // Category Name
-    if (category != "Desc") {
-      tbody.insertAdjacentHTML('beforeend', `<tr><td class="bold profile-category" colspan="2">${category}</td></tr>`)
-    }
+        // Type Name
+        let type_name_td = document.createElement("td")
+        type_name_td.classList.add("bold", "profile-cell")
+        type_name_td.style = "width: 35%;"
+        type_name_td.innerText = type
 
-    // Category Row-Cell values
-    for (const type in profle_obj['Content'][category]) {
-      if (category == "Image") continue
-      const tr = document.createElement("tr")
+        // Type Value
+        let type_value_td = document.createElement("td")
+        type_value_td.classList.add("profile-cell")
 
-      // Type Name
-      let type_name_td = document.createElement("td")
-      type_name_td.classList.add("bold", "profile-cell")
-      type_name_td.style = "width: 35%;"
-      type_name_td.innerText = type
-
-      // Type Value
-      let type_value_td = document.createElement("td")
-      type_value_td.classList.add("profile-cell")
-
-      if (Array.isArray(profle_obj['Content'][category][type])) {
-        for (const item of profle_obj['Content'][category][type]) {
-          let item_content = item
-          if (item.includes("|")) {
+        if (Array.isArray(profle_obj['Content'][category][type])) {
+          for (const item of profle_obj['Content'][category][type]) {
+            let item_content = item
+            if (item.includes("|")) {
+              let raw_list = item.split("|")
+              item_content = `<a href=${raw_list[1]}>${raw_list[0]}</a>`
+            }
+            type_value_td.innerHTML += `• ${item_content} <br>`
+          }
+        } else {
+          let item_content = profle_obj['Content'][category][type]
+          if (profle_obj['Content'][category][type].includes("|")) {
             let raw_list = item.split("|")
             item_content = `<a href=${raw_list[1]}>${raw_list[0]}</a>`
           }
-          type_value_td.innerHTML += `• ${item_content} <br>`
+          type_value_td.innerText = item_content
         }
-      } else {
-        let item_content = profle_obj['Content'][category][type]
-        if (profle_obj['Content'][category][type].includes("|")) {
-          let raw_list = item.split("|")
-          item_content = `<a href=${raw_list[1]}>${raw_list[0]}</a>`
-        }
-        type_value_td.innerText = item_content
+
+        // Add to Table
+        tr.appendChild(type_name_td)
+        tr.appendChild(type_value_td)
+        tbody.append(tr)
       }
 
-      // Add to Table
-      tr.appendChild(type_name_td)
-      tr.appendChild(type_value_td)
-      tbody.append(tr)
     }
+    // Add to Page
+    table.appendChild(tbody)
+    div.appendChild(table)
 
+    document.getElementById(pageTabId).prepend(div)
   }
-  // Add to Page
-  table.appendChild(tbody)
-  div.appendChild(table)
+
 }
 
+function createPageContentTabs(contentArea, tabIdsObj) {
+  let div = document.getElementById(contentArea)
+  
+  let btn = document.createElement('buttonn')
+  btn.id = contentArea + "-page-tab-button"
+
+  div.prepend(btn)
+
+  createPageTabs(btn.id, tabIdsObj)
+}
 
 // CREATE PAGE TABS
-function createPageTabs(button_id_div, tab_id_array) {
+function createPageTabs(button_id_div, tabIdsObj) {
 
   const content_group_class = makeid(7)
   const btn_group_id = makeid(7)
@@ -349,18 +420,18 @@ function createPageTabs(button_id_div, tab_id_array) {
   btn_div.id = btn_group_id
 
   let first = true
-  for (const id of tab_id_array) {
-    const elem = document.getElementById(id)
+  for (const idObj of tabIdsObj) {
+    const elem = document.getElementById(idObj.id)
     elem.classList.add(content_group_class)
     elem.style.display = "none"
 
     const btn = document.createElement("button")
-    btn.innerText = id
-    btn.setAttribute("onclick", `openTab(this, '${id}', '${content_group_class}', '${btn_group_id}')`)
+    btn.innerText = idObj.name
+    btn.setAttribute("onclick", `openTab(this, '${idObj.id}', '${content_group_class}', '${btn_group_id}')`)
     btn.classList.add("btn", "profile-image-btn")
 
     if (first == true) {
-      btn.classList.add("profile-tab-active")
+      btn.classList.add("tab-active")
       elem.style.display = "block"
       first = false
     }
@@ -409,15 +480,15 @@ function openTab(btn, tabName, content_group_class, btn_group_id) {
   let btngroup = document.getElementById(btn_group_id).getElementsByTagName('button')
   for (const gbtn of btngroup) {
     if (gbtn == btn) continue
-    if (!gbtn.classList.contains("profile-tab-active")) continue
-    gbtn.classList.remove("profile-tab-active")
+    if (!gbtn.classList.contains("tab-active")) continue
+    gbtn.classList.remove("tab-active")
   }
 
   // Adds Active Class on Current Tab
   let tab_content = document.getElementById(tabName)
   tab_content.style.display = "block"
 
-  btn.classList.add("profile-tab-active")
+  btn.classList.add("tab-active")
 }
 
 

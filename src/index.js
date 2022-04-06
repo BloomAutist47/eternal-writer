@@ -62,6 +62,11 @@ ipcMain.handle('dialog:openDirectory', async() => {
   }
 })
 
+ipcMain.handle('electronCheck', async() => {
+  console.log("YIEEH")
+  return true
+})
+
 
 ipcMain.on("toMain", async(event, value) => {
 
@@ -80,11 +85,18 @@ ipcMain.on("toMain", async(event, value) => {
     if (canceled) {
       return
     } else {
-      let child = new BrowserWindow({ parent: mainWindow })
+      let child = new BrowserWindow({
+        parent: mainWindow,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+          enableRemoteModule: true,
+          worldSafeExecuteJavaScript: true,
+          preload: path.join(__dirname, "js/preload.js")
+        }
+      })
       child.loadFile(filePaths[0] + "\\index.html")
       child.show()
-      console.log(filePaths[0])
-        // return filePaths[0]
     }
     return
   }
