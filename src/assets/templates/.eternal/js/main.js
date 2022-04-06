@@ -36,6 +36,12 @@ function getPage(filename) {
     })
 }
 
+function parseHTML(html) {
+  var t = document.createElement('template');
+  t.innerHTML = html;
+  return t.content.cloneNode(true);
+}
+
 function loadPage() {
   // Load Page
   if (window.location.search == "") return
@@ -69,27 +75,92 @@ function loadPage() {
           const filedata = data.split('<!-- File Content -->')[1].trim()
           const processedFiledata = renderText(filedata)
 
-          // Set editor textarea
-          // let textarea = document.getElementById('editor-nonspoiler-textarea')
-          // textarea.value = filedata
-          var simplemde = new SimpleMDE({
-            element: document.getElementById("editor-nonspoiler-textarea"),
-            autofocus: true,
-            initialValue: filedata,
-            hideIcons: [
-              "guide",
-              "side-by-side",
-              "preview"
-            ],
-            forceSync: true,
-            autofocus: true
-              // promptURLs: true
-          });
-          // simplemde.value(filedata);
 
-          document.getElementById('page-content').innerHTML = processedFiledata
+          let editorLineData = ""
+          for (let line of filedata.replace("\n\n", '<p></p>').split("\n")) {
+            editorLineData += line.trim() + "\n"
+          }
+
+          let editorData = parseHTML(editorLineData)
+
+
+          if (pageData.fileStructure.hasOwnProperty('spoiler')) {
+            let contentArea = document.getElementById("editor-spoiler");
+            let tabs = [];
+
+            for (const tab in pageData.fileStructure.spoiler) {
+              let textdiv = document.createElement('div');
+
+              let textarea = document.createElement("textarea");
+
+              textdiv.id = "spoiler-" + makeid(5);
+              textdiv.appendChild(textarea)
+              contentArea.appendChild(textdiv)
+              let simplemde = new SimpleMDE({
+                element: textarea,
+                autofocus: true,
+                hideIcons: [
+                  "guide",
+                  "side-by-side",
+                  "preview"
+                ],
+                forceSync: true,
+                autofocus: true
+              });
+
+              tabs.push({
+                name: pageData.fileStructure.spoiler[tab],
+                id: textdiv.id
+              });
+
+              simplemde.value(editorData.getElementById(tab).innerHTML.trim());
+            }
+
+            createPageTabs('editor-spoiler-tab-btns', tabs);
+
+
+          }
+
+          if (pageData.fileStructure.hasOwnProperty('nonSpoiler')) {
+            let contentArea = document.getElementById("editor-nonspoiler");
+            let tabs = [];
+
+            for (const tab in pageData.fileStructure.nonSpoiler) {
+              let textdiv = document.createElement('div');
+
+              let textarea = document.createElement("textarea");
+
+              textdiv.id = "spoiler-" + makeid(5);
+              textdiv.appendChild(textarea)
+              contentArea.appendChild(textdiv)
+              let simplemde = new SimpleMDE({
+                element: textarea,
+                autofocus: true,
+                hideIcons: [
+                  "guide",
+                  "side-by-side",
+                  "preview"
+                ],
+                forceSync: true,
+                autofocus: true
+              });
+
+              tabs.push({
+                name: pageData.fileStructure.nonSpoiler[tab],
+                id: textdiv.id
+              });
+
+              simplemde.value(editorData.getElementById(tab).innerHTML.trim());
+            }
+
+            createPageTabs('editor-nonspoiler-tab-btns', tabs);
+
+
+          }
+
+          let pageContent = document.getElementById('page-content')
+          pageContent.innerHTML = processedFiledata
           document.getElementById('page-title').innerHTML = `<h1>${directory[page]["name"]}</h1>`
-
 
         })
     }
@@ -400,9 +471,9 @@ function createProfileBox(_profileData) {
 
 function createPageContentTabs(contentArea, tabIdsObj) {
   let div = document.getElementById(contentArea)
-  
+
   let btn = document.createElement('buttonn')
-  btn.id = contentArea + "-page-tab-button"
+  btn.id = contentArea + "-page-tab-button-" + makeid(5)
 
   div.prepend(btn)
 

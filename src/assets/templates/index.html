@@ -79,35 +79,28 @@
             <!-- Content Area -->
             <div id="editor-content" class="row">
 
-
-
               <div class="editor-contents">
                 <h2>Page Content</h2>
-
                 <div id="editor-content-spoiler-tab-btns"></div>
 
                 <div id="editor-nonspoiler">
                   <div id="editor-nonspoiler-tab-btns"></div>
-                  <div class="editor-content-tab">
-
-                    <textarea id="editor-nonspoiler-textarea"></textarea>
-                  </div>
-
+                  <div class="editor-content-tab"></div>
+                  
                 </div>
 
                 <div id="editor-spoiler">
                   <div id="editor-spoiler-tab-btns"></div>
-                  <div class="editor-content-tab">
-                    <textarea id="editor-spoiler-textarea"></textarea>
-                  </div>
-
-
+                  <div class="editor-content-tab"></div>
                 </div>
+
               </div>
             </div>
 
           </div>
+
           <div class="modal-footer"></div>
+
         </div>
       </div>
     </div>
@@ -192,78 +185,29 @@
 
   <script>
     createPageTabs('editor-content-spoiler-tab-btns', [{
-        name: 'Non-spoiler Page',
+        name: 'NON-SPOILER CONTENT',
         id: 'editor-nonspoiler'
       }, {
-        name: 'Spoiler Page',
+        name: 'SPOILER CONTENT',
         id: 'editor-spoiler'
       }]
-
-
     );
+    
     showSpoilers()
 
     function showSpoilers() {
       const btns = document.getElementById('editor-content-spoiler-tab-btns')
       if (btns.style.display == "none") {
         btns.style.display = "block";
-        // document.getElementById('editor-nonspoiler').style.display = "block";
-        document.getElementById('editor-spoiler').style.display = "block";
+        document.getElementById('editor-nonspoiler').style.display = "block";
+        document.getElementById('editor-spoiler').style.display = "none";
       } else {
         btns.style.display = "none";
         const nonspoilerbtn = btns.getElementsByTagName('Button')[0].click()
-          // document.getElementById('editor-nonspoiler').style.display = "block";
         document.getElementById('editor-spoiler').style.display = "none";
       }
 
     }
-  </script>
-
-
-
-
-
-  <script>
-    // const tx = document.getElementsByTagName("textarea");
-    // for (let i = 0; i < tx.length; i++) {
-    //   tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
-    //   tx[i].addEventListener("input", OnInput, false);
-    // }
-
-    // function OnInput() {
-    //   this.style.height = "auto";
-    //   this.style.height = (this.scrollHeight) + "px";
-    // }
-
-    // document.getElementById("editor-nonspoiler-textarea").addEventListener("input", function() {
-    //   highlight()
-    // }, false);
-
-    // function highlight() {
-    //   const textarea = document.getElementById("editor-nonspoiler-textarea")
-    //   const lines = textarea.innerText.trim().split("\n")
-    //   let newValue = ""
-
-    //   for (let line of lines) {
-
-    //     const hres = line.match(/(#+)\s/);
-
-    //     if (hres) {
-    //       line = line.replace(hres[0], "").trim()
-    //       line = `<span class="hl-yellow">${line}</span>`
-    //     }
-
-    //     newValue += line + "\n"
-
-    //   }
-
-    //   textarea.innerText = newValue
-    // }
-
-    // window.api.isElectron()
-    //   .then(result => {
-    //     console.log("whasds")
-    //   })
   </script>
 
 </body>
