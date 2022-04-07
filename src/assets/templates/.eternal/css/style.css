@@ -1201,7 +1201,7 @@ body .body-card hr {
   cursor: pointer !important;
 }
 
-.btn-primary {
+.btn-one {
   font-size: 1rem;
   background-color: #0d6efd;
   color: whitesmoke;
@@ -1209,22 +1209,17 @@ body .body-card hr {
   cursor: pointer !important;
 }
 
-.btn-primary:hover {
+.btn-one:hover {
   background-color: #0e59ca;
   cursor: pointer !important;
 }
 
-.input-primary {
+.input-one {
   outline: 0px !important;
   -webkit-appearance: none;
   -webkit-box-shadow: none !important;
           box-shadow: none !important;
-  /* Double-sized Checkboxes */
-  /* IE */
-  /* FF */
   -webkit-transform: scale(1);
-  /* Safari and Chrome */
-  /* Opera */
   transform: scale(1);
   padding: 10px;
   margin: 0em;

@@ -1,48 +1,114 @@
-
-.editor-content {
-
-  textarea {
-    display: grid;
-    place-items: center;
-    vertical-align: middle;
-    width: 100%;
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
   }
-}
-
-#editor-content-spoiler-tab-btns {
-
-  .tab-active {
-    background-color: $Color1;
-    color: $FontColor2;
+  
+  /* Modal Content */
+  .modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+  
+  /* The Close Button */
+  .close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
   }
 
-  button {
-    // border: 1px solid $BorderColor;
-    padding: 1em 1.5em;
-    border-radius: 0.2em;
-    &:hover {
-      background-color: $Color1Dark;
-      color: $FontColor2;
-    } 
-  }
 
-}
 
-#editorHeaderRight {
-  button {
-    margin-bottom: 0.15em;
-    min-width: 10em !important;
-    padding: 0.5em 0em !important;
-  }
-}
 
-#page-content-title {
-  max-width: 10em;
-}
 
-.hl-yellow {
-  background-color: yellow;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// .editor-content {
+
+//   textarea {
+//     display: grid;
+//     place-items: center;
+//     vertical-align: middle;
+//     width: 100%;
+//   }
+// }
+
+// #editor-content-spoiler-tab-btns {
+
+//   .tab-active {
+//     background-color: $Color1;
+//     color: $FontColor2;
+//   }
+
+//   button {
+//     // border: 1px solid $BorderColor;
+//     padding: 1em 1.5em;
+//     border-radius: 0.2em;
+//     &:hover {
+//       background-color: $Color1Dark;
+//       color: $FontColor2;
+//     } 
+//   }
+
+// }
+
+// #editorHeaderRight {
+//   button {
+//     margin-bottom: 0.15em;
+//     min-width: 10em !important;
+//     padding: 0.5em 0em !important;
+//   }
+// }
+
+// #page-content-title {
+//   max-width: 10em;
+// }
+
+// .hl-yellow {
+//   background-color: yellow;
+// }
 
 
 // .editor-toolbar {

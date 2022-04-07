@@ -12,7 +12,8 @@ $BG2: #F7F7F7;
 $ToolTipBG: #eb4034;
 $ToolTipColor: #ffffff;
 $BorderColor: #ced4da;
-// Imports  
+
+// Imports    
 @import './navbar';
 @import './spoiler';
 @import './default';
@@ -20,6 +21,7 @@ $BorderColor: #ced4da;
 @import './profilebox';
 @import './editor';
 @import './simplemde';
+@import './notifications';
 
 // CSS 
 @mixin center {
@@ -95,7 +97,7 @@ body {
   cursor: pointer !important;
 }
 
-.btn-primary {
+.btn-one {
   font-size: 1rem;
   background-color: $Color1;
   color: $FontColor2;
@@ -107,17 +109,12 @@ body {
   }
 }
 
-.input-primary {
+.input-one {
   @include removeSelect();
-  /* Double-sized Checkboxes */
   -ms-transform: scale(1);
-  /* IE */
   -moz-transform: scale(1);
-  /* FF */
   -webkit-transform: scale(1);
-  /* Safari and Chrome */
   -o-transform: scale(1);
-  /* Opera */
   transform: scale(1);
   padding: 10px;
   margin: 0em;
