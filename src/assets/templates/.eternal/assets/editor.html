@@ -1,0 +1,78 @@
+<!-- The Modal -->
+<div id="editor-modal" class="container-fluid modal">
+  <!-- Modal content -->
+  <div class="modal-card col">
+
+    <div class="modal-bar modal-header">
+      <h1>Page Editor</h1>
+      <div>
+        <button class="btn btn-one">Save Changes</button>
+        <button class="btn btn-secondary" onclick="openModal('editor-modal')">Close</button>
+      </div>
+    </div>
+
+    <div class="modal-content">
+
+      <div class="row">
+        <div class="col-9">
+          <table class="editor-table">
+            <tr>
+              <td class="input-title">Page Title</td>
+              <td class="input-box"><input type="text" placeholder="Awesome page title!" id="editorPageTitle"></td>
+            </tr>
+            <tr>
+              <td class="input-title">Parent</td>
+              <td class="input-box"><input type="text" placeholder="Parent page name for breadcrumbs" id="editorParent"></td>
+            </tr>
+            <tr>
+              <td class="input-title">Tags</td>
+              <td class="input-box"><input type="text" placeholder="Tag1 Tag2 Tag3" id="editorTags"></td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="col-3">
+          <table class="button-table no-border">
+            <tr>
+              <td><button class="btn btn-one">Profile Box</button></td>
+            </tr>
+            <tr>
+              <td><button class="btn btn-one">Add Tabs</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="form-check checkbox-spoiler float-end">
+                  <input class="form-check-input check-box" type="checkbox" value="" id="editorSpoilerCheck" onclick="pageEditor.showSpoilers()">
+                  <label class="form-check-label" for="editorSpoilerCheck">
+                      Enable Spoilers
+                    </label>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+
+      <div id='editorContentDiv' class="row">
+        <h1>Content</h1>
+        <div id="editor-content-spoiler-tab-btns"></div>
+
+        <div id="editor-nonspoiler">
+          <div id="editor-nonspoiler-tab-btns"></div>
+          <div class="editor-content-tab"></div>
+
+        </div>
+
+        <div id="editor-spoiler">
+          <div id="editor-spoiler-tab-btns"></div>
+          <div class="editor-content-tab"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-bar modal-footer"></div>
+  </div>
+
+</div>

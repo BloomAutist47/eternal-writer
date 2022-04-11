@@ -83,8 +83,8 @@ function isObjEmpty(object) {
 }
 
 
-function insertAfter(newNode, existingNode) {
-  existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+function insertAfter(newNode, referenceNode) {
+  referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
 
 
@@ -134,6 +134,25 @@ function openTab(btn, tabName, content_group_class, btn_group_id) {
   btn.classList.add("tab-active")
 }
 
+function openModal(modalID) {
+  let modal = document.getElementById(modalID)
+  modal.classList.toggle('modal-visible')
+    // Hide scrollbar
+  document.getElementsByTagName("body")[0].classList.toggle("disable-srolling")
+  document.getElementsByTagName("html")[0].classList.toggle("disable-srolling")
+
+  // Exits modal if clicked outsie
+  if (modal.onclick != null) return;
+  modal.onclick = (event) => {
+    if (event.target == modal) {
+      modal.classList.remove('modal-visible')
+        // Reveal Scrollbar
+      document.getElementsByTagName("body")[0].classList.remove("disable-srolling")
+      document.getElementsByTagName("html")[0].classList.remove("disable-srolling")
+    }
+  }
+
+}
 
 function createTabs(button_id_div, tabIdsObj) {
 
@@ -174,13 +193,13 @@ function toggleSpoilers() {
     spoiler_div.style.display = "block"
     non_spoiler_div.style.display = "none"
     localStorage["theSongOfEnderion_isSpoiler"] = true;
+    document.getElementById('spoilerTooltipTexts').innerText = "Hide Spoilers";
   } else {
     spoiler_div.style.display = "none"
     non_spoiler_div.style.display = "block"
     localStorage["theSongOfEnderion_isSpoiler"] = false;
+    document.getElementById('spoilerTooltipTexts').innerText = "Show Spoilers";
   }
-
-  console.log(localStorage["theSongOfEnderion_isSpoiler"])
 }
 
 
@@ -253,34 +272,37 @@ class TextRenderer {
 
 // Class
 class Card {
-  constructor(pageUrl) {
 
-    // Gets Directory list and loads the page`
-    getAsset('directory.json')
-      .then(async (data) => {
-        directory = data;
 
-        // Gets the page data
-        let htmlData = await this.findFileData(pageUrl);
-        if (!htmlData) return;
+  constructor() {
+    this.pageData = {}
+    this.profileData = {}
+  }
+  async renderFromHTML(inputUrl) {
+    let htmlData = await this.findFileData(inputUrl);
+    if (!htmlData) return;
+    await this.renderPage(htmlData)
+  }
 
-        // Loads the Page and Renders Data
-        await this.loadPage(htmlData);
-      })
-      .then(() => {
+  async renderPage(htmlData) {
 
-        // Create Table of Content
-        this.createTOC();
+    // Loads the Page and Renders Data
+    await this.loadPage(htmlData);
 
-        // Create Profile Box
-        this.createProfileBox();
+    this.pageData = pageData;
+    this.profileData = profileData;
 
-        // Create Spoiler Tab Division
-        this.createSpoiler();
+    // Create Table of Content
+    this.createTOC();
 
-        // Create Page Tabs
-        this.createPageTabs();
-      })
+    // Create Profile Box
+    this.createProfileBox();
+
+    // Create Spoiler Tab Division
+    this.createSpoiler();
+
+    // Create Page Tabs
+    this.createPageTabs();
   }
 
   /**
@@ -565,7 +587,12 @@ class Card {
       table.appendChild(tbody);
       div.appendChild(table);
 
-      document.getElementById(pageTabId).prepend(div);
+
+      let parentDiv = document.createElement("div")
+      parentDiv.classList.add("profile-box-parent")
+      parentDiv.appendChild(div)
+
+      document.getElementById(pageTabId).prepend(parentDiv);
     }
   }
 
@@ -590,17 +617,19 @@ class Card {
     const spoilerDiv = document.getElementById("spoiler-button");
     spoilerDiv.classList.add("float-end", "tooltipStyle");
     spoilerDiv.innerHTML = `
-      <label class="switch">
-        <input type="checkbox" onclick="toggleSpoilers()">
+    
+      <label class="switch" >
+        <input type="checkbox" onclick="toggleSpoilers()" >
         <span class="slider round"></span>
       </label>
-      <span class="tooltipStyletext">Enables Spoilers!</span>`;
+      <span class="tooltipStyletext" id="spoilerTooltipTexts">Show Spoilers</span>`;
 
     if (localStorage["theSongOfEnderion_isSpoiler"] == 'true') {
       spoilerDiv.getElementsByTagName('input')[0].checked = true;
       // openSpoilers()
       document.getElementById("non-spoiler").style.display = "none";
       document.getElementById("spoiler").style.display = "block";
+      document.getElementById('spoilerTooltipTexts').innerText = "Hide Spoilers";
     } else {
       document.getElementById("non-spoiler").style.display = "block";
       document.getElementById("spoiler").style.display = "none";
@@ -628,6 +657,123 @@ class Card {
         createTabs(btn.id, obj.tabs)
       }
     }
+  }
+  getPageData() {
+    return this.pageData;
+  }
+
+  getProfileData() {
+    return this.profileData;
+  }
+
+}
+
+class PageEditor {
+  constructor(card) {
+    this.card = card
+    this.loadEditor()
+  }
+
+  loadEditor() {
+    getAsset('editor.html')
+      .then(data => {
+        document.getElementById('page-editor').innerHTML = data;
+        document.getElementById('page-editor').insertAdjacentHTML('beforeend', `<button id="modalbtn" onclick="openModal('editor-modal')">open modal</button>`);
+
+        // Create Spoiler and Non-Spoiler Tabs
+        this.createTabs();
+
+        this.createEditorContent();
+
+      })
+  }
+
+  createTabs() {
+    createTabs('editor-content-spoiler-tab-btns', [{
+      name: 'NON-SPOILER CONTENT',
+      id: 'editor-nonspoiler'
+    }, {
+      name: 'SPOILER CONTENT',
+      id: 'editor-spoiler'
+    }]);
+    this.showSpoilers();
+  }
+
+  showSpoilers() {
+    const btns = document.getElementById('editor-content-spoiler-tab-btns')
+    if (btns.style.display == "none") {
+      btns.style.display = "block";
+      document.getElementById('editor-nonspoiler').style.display = "block";
+      document.getElementById('editor-spoiler').style.display = "none";
+    } else {
+      btns.style.display = "none";
+      btns.getElementsByTagName('Button')[0].click()
+      document.getElementById('editor-spoiler').style.display = "none";
+    }
+  }
+
+  createEditorContent() {
+    let pageData = this.card.pageData;
+
+    // Create Spoiler Switch
+    if (pageData.functions.hasOwnProperty('createSpoilers') && pageData.functions.createSpoilers == true) {
+      document.getElementById('editorSpoilerCheck').checked = true
+      this.showSpoilers()
+    }
+
+    // Create Text Areas
+    this.createTextArea('spoiler');
+    this.createTextArea('nonspoiler');
+  }
+
+  createMDEditor(textarea, initialValue) {
+    return new EasyMDE({
+      element: textarea,
+      initialValue: initialValue,
+      autofocus: true,
+      hideIcons: [
+        "guide",
+        "side-by-side",
+        "preview"
+      ],
+      forceSync: true,
+    });
+  }
+
+  createTextArea(area) {
+    if (!pageData.fileStructure.hasOwnProperty(area)) return
+
+    let contentArea = document.getElementById(`editor-${area}`);
+    let tabs = [];
+
+    for (const tab in pageData.fileStructure[area]) {
+
+      // Create Div to put MD
+      let textdiv = document.createElement('div');
+      textdiv.id = area + "-" + makeid(5);
+
+      // Create Textarea
+      let textarea = document.createElement("textarea");
+
+      // Append div
+      textdiv.appendChild(textarea)
+      contentArea.appendChild(textdiv)
+
+      // Create Markdown
+      this.createMDEditor(textarea,
+        editorData.getElementById(tab).innerHTML.trim())
+
+      // Add Tab to button
+      tabs.push({
+        name: pageData.fileStructure[area][tab],
+        id: textdiv.id
+      });
+      
+      // Set Markdown Initial Value
+      // easyMDE.value();
+    }
+
+    createTabs(`editor-${area}-tab-btns`, tabs);
   }
 
 

@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Eternal Writer</title>
 
   <!-- CSS -->
@@ -11,7 +12,8 @@
 
   <!-- JS -->
   <script src="./.eternal/js/bootstrap.bundle.min.js"></script>
-  <script src="./.eternal/js/simplemde.min.js"></script>
+  <script src="./.eternal/js/easymde.min.js"></script>
+  <!-- <script src="./.eternal/js/simplemde.min.js"></script> -->
   <script src="./.eternal/js/notifications.js"></script>
   <script src="./.eternal/js/main.js"></script>
 
@@ -21,63 +23,15 @@
 
 <body>
 
-  <!-- Trigger/Open The Modal -->
-  <button id="myBtn">Open Modal</button>
-
-  <!-- The Modal -->
-  <div id="myModal" class="modal">
-
-    <!-- Modal content -->
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <p>Some text in the Modal..</p>
-    </div>
-
-  </div>
+  <div id="page-editor"> </div>
 
   <div class="container body-card">
     <div id="spoiler-button"></div>
 
     <div id="page-title"></div>
 
-    <div id="page-content">
-
-      <div id="spoiler"></div>
-      <div id="non-spoiler"></div>
-
-      <a href="?p=story-a">Test go</a>
-
-    </div>
+    <div id="page-content"><a href="?p=story-a">Test go</a></div>
   </div>
-
-
-  <script>
-    // Get the modal
-    var modal = document.getElementById("myModal");
-    
-    // Get the button that opens the modal
-    var btn = document.getElementById("myBtn");
-    
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close")[0];
-    
-    // When the user clicks the button, open the modal 
-    btn.onclick = function() {
-      modal.style.display = "block";
-    }
-    
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-      modal.style.display = "none";
-    }
-    
-    // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    }
-    </script>
 
   <script>
     // Add Site Head
@@ -96,127 +50,33 @@
             document.getElementById('nav-card').innerHTML = data
           })
       })
+    
+    // Gets Directory
+    getAsset('directory.json')
+      .then(async(data) => {
+        directory = data;
+      })
+      .then(() => {
+        // Gets Input Url
+        if (window.location.search != "") {
+          let urlParams = new URLSearchParams(window.location.search);
+          let inputUrl = urlParams.get('p').trim();
 
-    // Gets Input Url
-    if (window.location.search != "") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const inputUrl = urlParams.get('p').trim();
+          // Renders Page
+          pageCard = new Card()
+          pageCard.renderFromHTML(inputUrl)
+            .then(() => {
+              // Renders Editor
+              pageEditor = new PageEditor(pageCard)
+            })
 
-      pageCard = new Card(inputUrl)
-    }
+
+
+
+        }
+      })
   </script>
 
-
-
-
-  <!-- <script>
-    createTabs('editor-content-spoiler-tab-btns', [{
-      name: 'NON-SPOILER CONTENT',
-      id: 'editor-nonspoiler'
-    }, {
-      name: 'SPOILER CONTENT',
-      id: 'editor-spoiler'
-    }]);
-
-    showSpoilers()
-
-    function showSpoilers() {
-      const btns = document.getElementById('editor-content-spoiler-tab-btns')
-      if (btns.style.display == "none") {
-        btns.style.display = "block";
-        document.getElementById('editor-nonspoiler').style.display = "block";
-        document.getElementById('editor-spoiler').style.display = "none";
-      } else {
-        btns.style.display = "none";
-        const nonspoilerbtn = btns.getElementsByTagName('Button')[0].click()
-        document.getElementById('editor-spoiler').style.display = "none";
-      }
-
-    }
-
-    function createEditorContent() {
-      // Create Spoiler Switch
-      if (pageData.functions.hasOwnProperty('createSpoilers') && pageData.functions.createSpoilers == true) {
-        document.getElementById('inputSpoilerCheck').checked = true
-        showSpoilers()
-      }
-
-
-      if (pageData.fileStructure.hasOwnProperty('spoiler')) {
-        let contentArea = document.getElementById("editor-spoiler");
-        let tabs = [];
-
-        for (const tab in pageData.fileStructure.spoiler) {
-          let textdiv = document.createElement('div');
-
-          let textarea = document.createElement("textarea");
-
-          textdiv.id = "spoiler-" + makeid(5);
-          textdiv.appendChild(textarea)
-          contentArea.appendChild(textdiv)
-          let simplemde = new SimpleMDE({
-            element: textarea,
-            autofocus: true,
-            hideIcons: [
-              "guide",
-              "side-by-side",
-              "preview"
-            ],
-            forceSync: true,
-            autofocus: true
-          });
-
-          tabs.push({
-            name: pageData.fileStructure.spoiler[tab],
-            id: textdiv.id
-          });
-
-          simplemde.value(editorData.getElementById(tab).innerHTML.trim());
-        }
-
-        createTabs('editor-spoiler-tab-btns', tabs);
-
-
-      }
-
-      if (pageData.fileStructure.hasOwnProperty('nonSpoiler')) {
-        let contentArea = document.getElementById("editor-nonspoiler");
-        let tabs = [];
-
-        for (const tab in pageData.fileStructure.nonSpoiler) {
-          let textdiv = document.createElement('div');
-
-          let textarea = document.createElement("textarea");
-
-          textdiv.id = "spoiler-" + makeid(5);
-          textdiv.appendChild(textarea)
-          contentArea.appendChild(textdiv)
-          let simplemde = new SimpleMDE({
-            element: textarea,
-            autofocus: true,
-            hideIcons: [
-              "guide",
-              "side-by-side",
-              "preview"
-            ],
-            forceSync: true,
-            autofocus: true
-          });
-
-          tabs.push({
-            name: pageData.fileStructure.nonSpoiler[tab],
-            id: textdiv.id
-          });
-
-          simplemde.value(editorData.getElementById(tab).innerHTML.trim());
-        }
-
-        createTabs('editor-nonspoiler-tab-btns', tabs);
-
-
-      }
-    }
-  </script> -->
 
 </body>
 

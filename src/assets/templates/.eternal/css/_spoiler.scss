@@ -57,6 +57,9 @@
 
 }
 
+
+
+
 .tooltipStyle {
     position: relative;
     display: inline-block;
@@ -64,19 +67,21 @@
     transition: 0.3s;
 }
 
-
 .tooltipStyle .tooltipStyletext {
     visibility: hidden;
     width: 10em;
-    background-color: $ToolTipBG;
-    color: $ToolTipColor;
+    background-color: #eb4034;
+    color: #fff;
     text-align: center;
     border-radius: 0.2em;
+    padding: 0.3em 1em;
+    /* Position the tooltipStyle */
     position: absolute;
     z-index: 1;
+    top: -5px;
     right: 105%;
-    &:hover .tooltipStyletext {
-        visibility: visible;
-    }
 }
 
+.tooltipStyle:hover .tooltipStyletext {
+    visibility: visible;
+}
