@@ -92,3 +92,4 @@ out/
 # others
 scratch/
 .unotes/
+.vscode/
