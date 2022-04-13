@@ -881,7 +881,7 @@ class PageEditor {
   }
 
   saveEditor() {
-
+ 
     // Save Content
     let htmlContent = '<!-- File Content -->\n\n'
 
