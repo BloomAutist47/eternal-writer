@@ -3,8 +3,69 @@ var directory; // Obj containing directory.json
 var idList = []; // List of randomly generated ids
 var pageCard; // Contains the page card Class
 var editorData; // Contains parsed data for the editor
+var isEditorChanged = false;
+var notificationGreen;
+var notificationRed;
+
+function renderPage() {
+  isEditorChanged = false;
+  let urlParams = new URLSearchParams(window.location.search);
+  let inputUrl = urlParams.get('p').trim();
+
+  // Renders Page
+  pageCard = new Card()
+  pageCard.renderFromHTML(inputUrl)
+    .then(() => {
+      notificationGreen = window.createNotification({
+        theme: 'success'
+      });
+
+      notificationRed = window.createNotification({
+        theme: 'error'
+      });
+
+      // Renders Editor
+      pageEditor = new PageEditor(pageCard)
+      pageEditor.loadEditor()
+        .then(() => {
+          // document.getElementById('modalbtn').click();
+          // document.getElementById('editorAreaBtns').getElementsByTagName('button')[2].click()
+          // printIDList()
+        })
+    })
+}
+
+function printIDList() {
+  console.log(idList)
+}
 
 // Functions
+
+function notify(type, title, message) {
+  switch (type) {
+    case "success":
+      notificationGreen({
+        title: title,
+        message: message
+      });
+      return;
+    case "error":
+      notificationRed({
+        title: title,
+        message: message
+      });
+      return;
+    default:
+      break;
+  }
+}
+
+
+
+
+
+
+
 function getAsset(filename) {
   let raw = filename.split(".");
   const filetype = raw[raw.length - 1];
@@ -88,6 +149,8 @@ function insertAfter(newNode, referenceNode) {
 }
 
 
+
+
 /**
  * Generate Random String ID.
  *
@@ -134,7 +197,13 @@ function openTab(btn, tabName, content_group_class, btn_group_id) {
   btn.classList.add("tab-active")
 }
 
-function openModal(modalID) {
+
+function openModal(modalID, renderPageAgain=false) {
+  if (renderPageAgain && isEditorChanged) {
+    renderPage()
+    console.log('what')
+  }
+
   let modal = document.getElementById(modalID)
   modal.classList.toggle('modal-visible')
     // Hide scrollbar
@@ -166,6 +235,7 @@ function createTabs(button_id_div, tabIdsObj) {
   let first = true
   for (const idObj of tabIdsObj) {
     const elem = document.getElementById(idObj.id)
+    if (!elem) continue
     elem.classList.add(content_group_class)
     elem.style.display = "none"
 
@@ -186,20 +256,21 @@ function createTabs(button_id_div, tabIdsObj) {
 }
 
 function toggleSpoilers() {
-  const spoiler_div = document.getElementById("spoiler")
-  const non_spoiler_div = document.getElementById("non-spoiler")
-
-  if (spoiler_div.style.display == "none") {
-    spoiler_div.style.display = "block"
-    non_spoiler_div.style.display = "none"
-    localStorage["theSongOfEnderion_isSpoiler"] = true;
-    document.getElementById('spoilerTooltipTexts').innerText = "Hide Spoilers";
+  if (document.getElementById("spoiler").style.display == "none") {
+    setSpoilersVisibility(true);
   } else {
-    spoiler_div.style.display = "none"
-    non_spoiler_div.style.display = "block"
-    localStorage["theSongOfEnderion_isSpoiler"] = false;
-    document.getElementById('spoilerTooltipTexts').innerText = "Show Spoilers";
+    setSpoilersVisibility(false);
   }
+}
+
+function setSpoilersVisibility(isVisible) {
+  let spoiler_div = document.getElementById("spoiler");
+  let non_spoiler_div = document.getElementById("nonspoiler");
+
+  spoiler_div.style.display = (isVisible == true ) ? "block" : 'none';
+  non_spoiler_div.style.display = (isVisible == true ) ? "none" : 'block';
+  localStorage["theSongOfEnderion_isSpoiler"] = isVisible;
+  document.getElementById('spoilerTooltipTexts').innerText = (isVisible == true ) ? "Hide Spoilers" : "Show Spoilers";
 }
 
 
@@ -232,16 +303,19 @@ class TextRenderer {
         htmlContent += `<li>${value.replace("* ", "").trim()}</li>\n`;
         continue;
       }
-
+      // <div class="mb-4">\n</div>
       // Headers
       const hres = value.match(/(#+)\s/);
       if (hres) {
         let h = this.headerConvertionTable[hres[0]];
-        htmlContent += `<div class="mt-4">\n</div><${h} class="h">${value.replace(hres[0], "")}</${h}>\n`;
+        htmlContent += `<${h} class="h">${value.replace(hres[0], "")}</${h}>\n`;
         if (h == "h1") htmlContent += '<hr>\n';
         continue;
       }
-
+      if (value == "</div>" || value.match(/\<div(.+?)\>/)) {
+        htmlContent += value;
+        continue;
+      }
       htmlContent += value + '<p class="space"></p>\n';
     }
     return htmlContent;
@@ -275,22 +349,24 @@ class Card {
 
 
   constructor() {
-    this.pageData = {}
-    this.profileData = {}
+
   }
+
   async renderFromHTML(inputUrl) {
     let htmlData = await this.findFileData(inputUrl);
     if (!htmlData) return;
     await this.renderPage(htmlData)
   }
 
-  async renderPage(htmlData) {
+  async renderPage(htmlData, full = true) {
 
     // Loads the Page and Renders Data
-    await this.loadPage(htmlData);
+    await this.loadPage(htmlData, full);
 
-    this.pageData = pageData;
-    this.profileData = profileData;
+    // if (full) {
+    //   pageData = pageData;
+    //   profileData = profileData;
+    // }
 
     // Create Table of Content
     this.createTOC();
@@ -315,7 +391,7 @@ class Card {
    * @see  TextRenderer 
    * @param {string}   htmlData   A string of the html file.
    */
-  async loadPage(htmlData) {
+  async loadPage(htmlData, full) {
     // Variables
 
     idList = []
@@ -323,8 +399,10 @@ class Card {
     // Parses the data into a node
     const splitData = htmlData.split('<!-- File Content -->');
 
-    // Loads the Scripts
-    this.loadScripts(splitData[0]);
+    if (full) {
+      // Loads the Scripts
+      this.loadScripts(splitData[0]);
+    }
 
     // Loads File Content
     const contentData = splitData[1].trim();
@@ -336,7 +414,10 @@ class Card {
     // Set Page data
     let pageContent = document.getElementById('page-content');
     pageContent.innerHTML = rt.renderText(contentData);
-    document.getElementById('page-title').innerHTML = `<h1>${pageData.title}</h1>`;
+
+    this.setTitle(pageData.title)
+    this.setTags(pageData.tags)
+    this.setBreadCrumbs(pageData.parent)
   }
 
 
@@ -468,6 +549,8 @@ class Card {
     if (isObjEmpty(profileData)) return;
 
     for (const pageTabId in profileData) {
+      let divToPlaceProfileBoxIn = document.getElementById(pageTabId);
+      if (!divToPlaceProfileBoxIn) continue;
       const profle_obj = profileData[pageTabId];
       const div = document.createElement('div');
       div.id = pageTabId + "-profilebox";
@@ -592,14 +675,14 @@ class Card {
       parentDiv.classList.add("profile-box-parent")
       parentDiv.appendChild(div)
 
-      document.getElementById(pageTabId).prepend(parentDiv);
+      divToPlaceProfileBoxIn.prepend(parentDiv);
     }
   }
 
   /**
    * Create Spoiler Divs.
    *
-   * Takes the 'spoiler' and 'non-spoiler' div in the html file
+   * Takes the 'spoiler' and 'nonspoiler' div in the html file
    * and places them in two tabs. It also creates a spoiler
    * switch button.
    *
@@ -624,15 +707,12 @@ class Card {
       </label>
       <span class="tooltipStyletext" id="spoilerTooltipTexts">Show Spoilers</span>`;
 
+    
     if (localStorage["theSongOfEnderion_isSpoiler"] == 'true') {
       spoilerDiv.getElementsByTagName('input')[0].checked = true;
-      // openSpoilers()
-      document.getElementById("non-spoiler").style.display = "none";
-      document.getElementById("spoiler").style.display = "block";
-      document.getElementById('spoilerTooltipTexts').innerText = "Hide Spoilers";
+      setSpoilersVisibility(true)
     } else {
-      document.getElementById("non-spoiler").style.display = "block";
-      document.getElementById("spoiler").style.display = "none";
+      setSpoilersVisibility(false)
     }
   }
 
@@ -645,88 +725,190 @@ class Card {
    * @access     private
    */
   createPageTabs() {
-    if (pageData.functions.createTabs && Object.keys(pageData.functions.createTabs).length != 0) {
-      for (const obj of pageData.functions.createTabs) {
-        let div = document.getElementById(obj.contentArea)
+    if (isObjEmpty(pageData.fileStructure)) return
 
-        let btn = document.createElement('div')
-        btn.id = obj.contentArea + "-page-tab-button-" + makeid(5)
+    for (const area in pageData.fileStructure) {
+      if (isObjEmpty(pageData.fileStructure[area])) continue
+      let div = document.getElementById(area)
 
-        div.prepend(btn)
+      let btn = document.createElement('div')
+      btn.id = area + "-page-tab-button-" + makeid(5)
+      div.prepend(btn)
 
-        createTabs(btn.id, obj.tabs)
+      let tabsObj = []
+
+      for (const tabId in pageData.fileStructure[area]) {
+        tabsObj.push({ name: pageData.fileStructure[area][tabId], id: tabId })
       }
+      if (tabsObj.length == 1) {
+        btn.style.display = "none";
+      }
+      createTabs(btn.id, tabsObj)
     }
+
   }
   getPageData() {
-    return this.pageData;
+    return pageData;
   }
 
   getProfileData() {
-    return this.profileData;
+    return profileData;
   }
 
+  setTitle(name) {
+    document.getElementById('page-title').getElementsByTagName('h1')[0].innerText = name;
+  }
+  setTags(tags) {
+    if (!tags) {
+      document.getElementById('page-tags').style.display = 'none';
+      return
+    }
+
+    let tagsHTML = '';
+    for (const tag of tags.trim().split(" ")) {
+      tagsHTML += `<a href="#" _target="blank">${tag}</a> `;
+    }
+    let tagsDiv = document.getElementById('page-tags');
+    tagsDiv.innerHTML = tagsHTML;
+    tagsDiv.style.display = 'block';
+  }
+  setBreadCrumbs(crumbs) {
+    let crumbDiv = document.getElementById("page-breadcrumbs");
+    if (!crumbs) {
+      crumbDiv.style.display = "none";
+      return
+    }
+
+    crumbDiv.style.display = "block";
+    crumbDiv.innerText = crumbs;
+  }
+
+  setSpoilers(isVisible) {
+    pageData.functions.createSpoilers = isVisible;
+    setSpoilersVisibility(isVisible);
+    document.getElementById('spoiler-button').style.display = (isVisible == true) ? "block" : "none"
+  }
+
+  renameTab(area, oldTabId, newTab) {
+    let fskeys = Object.keys(pageData.fileStructure[area]);
+    let index = fskeys.indexOf(oldTabId)
+
+    fskeys.splice(index, 1);
+
+    let keyValues = Object.entries(pageData.fileStructure[area]); //convert object to keyValues ["key1", "value1"] ["key2", "value2"]
+    keyValues.splice(index, 1);
+
+    keyValues.splice(index, 0, [newTab.id, newTab.name]); // insert key value at the index you want like 1.
+    pageData.fileStructure[area] = Object.fromEntries(keyValues) // convert key values to obj {key1: "value1", newKey: "newValue", key2: "value2"}
+
+    if (profileData.hasOwnProperty(oldTabId)) {
+      let x = profileData[oldTabId];
+      delete profileData[oldTabId];
+      profileData[newTab.id] = x;
+      console.log(profileData)
+    }
+  }
+
+  removeTab(area, tabID) {
+    delete pageData.fileStructure[area][tabID];
+  }
+
+  addTab(area, tabID, tabName) {
+    pageData.fileStructure[area][tabID] = tabName;
+
+    let tabDiv = document.createElement('div')
+    tabDiv.id = tabID;
+    tabDiv.classList.add("page-tab")
+
+    editorData.getElementById(area).appendChild(tabDiv);
+    console.log(tabID + " " + tabName);
+  }
 }
 
 class PageEditor {
   constructor(card) {
     this.card = card
-    this.loadEditor()
+    this.filestructure = {}
+
+    this.editorAreaIDs = [
+      "editorContentDiv",
+      "editorProfileBoxDiv",
+      "editorManageTabs",
+    ]
+
+    // Manage tab
+    this.manageTabSelected
   }
 
   loadEditor() {
-    getAsset('editor.html')
+    return getAsset('editor.html')
       .then(data => {
         document.getElementById('page-editor').innerHTML = data;
-        document.getElementById('page-editor').insertAdjacentHTML('beforeend', `<button id="modalbtn" onclick="openModal('editor-modal')">open modal</button>`);
+        // document.getElementById('page-editor').insertAdjacentHTML('beforeend', `<button id="modalbtn" onclick="openModal('editor-modal')">open modal</button>`);
 
-        // Create Spoiler and Non-Spoiler Tabs
-        this.createTabs();
+        // Create Spoiler and nonspoiler Tabs
+        createTabs('editor-content-spoiler-tab-btns', [{
+          name: 'NON-SPOILER CONTENT',
+          id: 'editor-nonspoiler'
+        }, {
+          name: 'SPOILER CONTENT',
+          id: 'editor-spoiler'
+        }]);
+        this.showSpoilers();
 
-        this.createEditorContent();
+        // Create the Content Area
+        // let pageData = pageData;
 
+        // Spoiler Switch
+        if (pageData.functions.hasOwnProperty('createSpoilers') && pageData.functions.createSpoilers == true) {
+          document.getElementById('editorSpoilerCheck').checked = true
+          this.showSpoilers()
+        }
+
+        // Content Areas
+        this.generateTextArea('spoiler');
+        this.generateTextArea('nonspoiler');
+
+        // Meta Area
+        document.getElementById('editorPageTitle').value = pageData.title
+        document.getElementById('editorParent').value = pageData.parent
+        document.getElementById('editorTags').value = pageData.tags
+
+        // Manage Tabs Area
+        this.generateTabArea('spoiler');
+        this.generateTabArea('nonspoiler');
       })
   }
 
-  createTabs() {
-    createTabs('editor-content-spoiler-tab-btns', [{
-      name: 'NON-SPOILER CONTENT',
-      id: 'editor-nonspoiler'
-    }, {
-      name: 'SPOILER CONTENT',
-      id: 'editor-spoiler'
-    }]);
-    this.showSpoilers();
-  }
+  saveEditor() {
 
-  showSpoilers() {
-    const btns = document.getElementById('editor-content-spoiler-tab-btns')
-    if (btns.style.display == "none") {
-      btns.style.display = "block";
-      document.getElementById('editor-nonspoiler').style.display = "block";
-      document.getElementById('editor-spoiler').style.display = "none";
-    } else {
-      btns.style.display = "none";
-      btns.getElementsByTagName('Button')[0].click()
-      document.getElementById('editor-spoiler').style.display = "none";
-    }
-  }
+    // Save Content
+    let htmlContent = '<!-- File Content -->\n\n'
 
-  createEditorContent() {
-    let pageData = this.card.pageData;
+    for (const area in this.filestructure) {
+      let innerValue = ''
 
-    // Create Spoiler Switch
-    if (pageData.functions.hasOwnProperty('createSpoilers') && pageData.functions.createSpoilers == true) {
-      document.getElementById('editorSpoilerCheck').checked = true
-      this.showSpoilers()
+      for (const tab in this.filestructure[area]) {
+        let tabValue = document.getElementById(tab).value;
+        innerValue += `\n<div id="${this.filestructure[area][tab].htmlId}" class="page-tab">\n${tabValue}\n</div>\n`
+      }
+      htmlContent += `<div id="${area}">${innerValue}</div>\n`
     }
 
-    // Create Text Areas
-    this.createTextArea('spoiler');
-    this.createTextArea('nonspoiler');
+    this.card.renderPage(htmlContent, false)
+      .then(() => {
+        // Save Metadata
+        this.card.setTitle(document.getElementById('editorPageTitle').value);
+        this.card.setTags(document.getElementById('editorTags').value);
+        this.card.setBreadCrumbs(document.getElementById('editorParent').value);
+        this.card.setSpoilers(document.getElementById('editorSpoilerCheck').checked);
+
+        notify("success", "Successful Save", "Page has been re-rendered.")
+        isEditorChanged = false;
+      })
   }
 
-  createMDEditor(textarea, initialValue) {
+  generateMDEditor(textarea, initialValue) {
     return new EasyMDE({
       element: textarea,
       initialValue: initialValue,
@@ -740,41 +922,202 @@ class PageEditor {
     });
   }
 
-  createTextArea(area) {
+  generateTextArea(area) {
     if (!pageData.fileStructure.hasOwnProperty(area)) return
 
-    let contentArea = document.getElementById(`editor-${area}`);
+    this.filestructure[area] = {};
+
+    let contentArea = document.getElementById(`editor-${area}-content-tab`);
+    contentArea.innerHTML = '';
+
+    let btnArea = document.getElementById(`editor-${area}-tab-btns`)
+    btnArea.innerHTML = '';
+
     let tabs = [];
 
     for (const tab in pageData.fileStructure[area]) {
-
       // Create Div to put MD
       let textdiv = document.createElement('div');
-      textdiv.id = area + "-" + makeid(5);
+      textdiv.id = tab + "-editordiv-" + makeid(4);
 
       // Create Textarea
       let textarea = document.createElement("textarea");
+      textarea.id = tab + "-editor";
 
       // Append div
-      textdiv.appendChild(textarea)
-      contentArea.appendChild(textdiv)
+      textdiv.appendChild(textarea);
+      contentArea.appendChild(textdiv);
 
       // Create Markdown
-      this.createMDEditor(textarea,
-        editorData.getElementById(tab).innerHTML.trim())
-
+      let md = this.generateMDEditor(textarea,
+        editorData.getElementById(tab).innerHTML.trim());
       // Add Tab to button
+      md.onchange = this.editorModified();
       tabs.push({
         name: pageData.fileStructure[area][tab],
         id: textdiv.id
       });
-      
-      // Set Markdown Initial Value
-      // easyMDE.value();
+
+      this.filestructure[area][textarea.id] = {
+        htmlName: pageData.fileStructure[area][tab],
+        htmlId: tab,
+      }
     }
 
     createTabs(`editor-${area}-tab-btns`, tabs);
   }
 
+  generateTabId(area, name) {
+    let id = `${area}-${name}`;
 
+    if (idList.includes(id)) {
+      id += "-" + makeid(4);
+    }
+    idList.push(id);
+    return id;
+  }
+
+  generateTabArea(area) {
+    let selectGroup = document.getElementById(`managetab-${area}-list`);
+    selectGroup.innerHTML = '';
+    for (const tab in pageData.fileStructure[area]) {
+      let optionId = tab;
+      if (idList.includes(optionId)) {
+        optionId += "-" + makeid(4);
+      }
+      idList.push(optionId);
+      selectGroup.insertAdjacentHTML('beforeend', `<option value="${optionId}">${pageData.fileStructure[area][tab]}</option>`);
+    }
+  }
+  switchEditorArea(targetBtn, targetId) {
+    let btns = document.getElementById('editorAreaBtns').getElementsByTagName('button');
+
+    // Clear Buttons
+    for (const btn of btns) {
+      if (btn == targetBtn) {
+        targetBtn.classList.add('btn-active');
+        continue;
+      }
+      btn.classList.remove('btn-active');
+    }
+
+    // Clear Area Div
+    for (const areaID of this.editorAreaIDs) {
+      if (areaID == targetId) {
+        document.getElementById(areaID).classList.remove('hide');
+        continue
+      }
+      document.getElementById(areaID).classList.add('hide');
+    }
+  }
+
+  showSpoilers() {
+    const btns = document.getElementById('editor-content-spoiler-tab-btns');
+    if (btns.style.display == "none") {
+      btns.style.display = "block";
+      document.getElementById('editor-nonspoiler').style.display = "block";
+      document.getElementById('editor-spoiler').style.display = "none";
+    } else {
+      btns.style.display = "none";
+      btns.getElementsByTagName('Button')[0].click();
+      document.getElementById('editor-spoiler').style.display = "none";
+    }
+  }
+
+
+  tabUp() {
+    let list = document.getElementById('managetab-contentarea-list');
+  }
+
+  tabGetSelectedArea() {
+    if (typeof this.manageTabSelected == 'undefined') return;
+    return this.manageTabSelected.parentNode.id.split("-")[1];
+  }
+  tabSelectedOption(sel) {
+    this.manageTabSelected = sel.options[sel.selectedIndex];
+    document.getElementById('tabReNameInput').value = this.manageTabSelected.innerText;
+  }
+
+  tabClear(inputId) {
+    document.getElementById(inputId).value = ''
+  }
+
+  tabRename() {
+    if (typeof this.manageTabSelected == 'undefined') return;
+    let newName = document.getElementById('tabReNameInput').value;
+
+    // Checks if no change in name
+    if (newName == this.manageTabSelected.innerText) return;
+
+    // Whether its a spoiler or nonspoiler area
+    let area = this.tabGetSelectedArea();
+
+    // Save old data
+    let oldTabId = this.manageTabSelected.value;
+
+    // Set New data
+    this.manageTabSelected.innerText = newName;
+    this.manageTabSelected.value = this.manageTabSelected.value.split("-")[0] + "-" + newName.toLocaleLowerCase();
+
+    // Save New Data
+    let newData = {
+      id: this.manageTabSelected.value,
+      name: this.manageTabSelected.innerText,
+    };
+
+    // Set Card Tabs
+    this.card.renameTab(area, oldTabId, newData);
+
+    // Edit editorData
+    editorData.getElementById(oldTabId).id = newData.id;
+
+    // Content Areas
+    this.generateTextArea(area);
+    notify("success", "Successfully Renamed", "");
+    this.editorModified();
+  }
+
+  tabRemove() {
+    if (typeof this.manageTabSelected == 'undefined') return;
+    let area = this.tabGetSelectedArea();
+
+    if (Object.keys(pageData.fileStructure[area]).length == 1) {
+      notify("error", "Removal Failed", "Content Area must have atleast one textarea.")
+      return;
+    }
+
+    let areaList = document.getElementById('managetab-spoiler-list');
+    areaList.removeChild(this.manageTabSelected);
+
+    this.tabClear('tabReNameInput');
+
+    this.card.removeTab(area, this.manageTabSelected.value);
+    this.generateTextArea(area);
+    this.editorModified();
+
+    this.manageTabSelected = undefined;
+
+    notify('success', 'Removal Successful', 'Tab removed. But content remains hidden.');
+  }
+
+  tabAdd() {
+    let area = document.querySelector('input[name="contentAreaRadio"]:checked').value;
+    let tabName = document.getElementById('tabNewNameInput').value;
+    let tabId = this.generateTabId(area, tabName);
+
+    // Add to boxlist
+    let areaList = document.getElementById(`managetab-${area}-list`);
+    areaList.insertAdjacentHTML('beforeend', `<option value="${tabId}">${tabName}</option>`);
+
+    this.card.addTab(area, tabId, tabName);
+    this.generateTextArea(area);
+    this.editorModified();
+
+    notify('success', 'Add Successful', 'New tab added');
+  }
+
+  editorModified() {
+    if (isEditorChanged) return;
+    isEditorChanged =  true;
+  }  
 }

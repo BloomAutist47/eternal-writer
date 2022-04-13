@@ -7,13 +7,11 @@
   <title>Eternal Writer</title>
 
   <!-- CSS -->
-  <link href="./.eternal/css/bootstrap.min.css" rel="stylesheet">
   <link href="./.eternal/css/style.css" rel="stylesheet">
 
   <!-- JS -->
   <script src="./.eternal/js/bootstrap.bundle.min.js"></script>
   <script src="./.eternal/js/easymde.min.js"></script>
-  <!-- <script src="./.eternal/js/simplemde.min.js"></script> -->
   <script src="./.eternal/js/notifications.js"></script>
   <script src="./.eternal/js/main.js"></script>
 
@@ -22,15 +20,20 @@
 </head>
 
 <body>
-
+  <button id="modalbtn" onclick="createEditor()">open modal</button>
   <div id="page-editor"> </div>
 
   <div class="container body-card">
     <div id="spoiler-button"></div>
 
-    <div id="page-title"></div>
+    <div id="page-title">
+      <h1></h1>
+      <div id="page-breadcrumbs"></div>
+    </div>
 
     <div id="page-content"><a href="?p=story-a">Test go</a></div>
+
+    <div id="page-tags"></div>
   </div>
 
   <script>
@@ -50,7 +53,7 @@
             document.getElementById('nav-card').innerHTML = data
           })
       })
-    
+
     // Gets Directory
     getAsset('directory.json')
       .then(async(data) => {
@@ -59,24 +62,21 @@
       .then(() => {
         // Gets Input Url
         if (window.location.search != "") {
-          let urlParams = new URLSearchParams(window.location.search);
-          let inputUrl = urlParams.get('p').trim();
-
-          // Renders Page
-          pageCard = new Card()
-          pageCard.renderFromHTML(inputUrl)
-            .then(() => {
-              // Renders Editor
-              pageEditor = new PageEditor(pageCard)
-            })
-
-
-
-
+          renderPage();
         }
       })
+
+    function createEditor() {
+      openModal('editor-modal')
+    }
   </script>
 
+  <script>
+    function myNewFunction(sel) {
+      let selected = sel.value;
+      console.log(selected);
+    }
+  </script>
 
 </body>
 
