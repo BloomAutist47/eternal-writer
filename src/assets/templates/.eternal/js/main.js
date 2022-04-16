@@ -18,13 +18,16 @@ var sideBar;
 var isEditorChanged = false;
 var tempProfilesData = {};
 
-function renderPage(renderDefault = false) {
-  let urlParams = new URLSearchParams(window.location.search);
-  pageUrl = urlParams.get('p').replace(/\s/g, "-");
+function renderPage() {
+  if (window.location.search != "") {
+    let urlParams = new URLSearchParams(window.location.search);
+    pageUrl = urlParams.get('p').replace(/\s/g, "-");
+    if (pageUrl) pageUrl.trim();
+  } else {
+    // If Home page
+    pageUrl = 'home';
 
-  // If Home page
-  if (!pageUrl) pageUrl = 'home';
-  pageUrl.trim();
+  }
 
   // Renders Page
   pageCard = new Card();
@@ -986,6 +989,14 @@ class Card {
    * @param {string}   crumbs   parent page name.
    */
   setBreadCrumbs(mode, crumbs) {
+    let crumbDiv = document.getElementById("page-breadcrumbs");
+
+    // Validation. Checks if [crumbs] is empty
+    if (!crumbs) {
+      crumbDiv.classList.add('hide');
+      return;
+    }
+
     let target = '';
     let parentUrl;
     if (mode == "editor") {
@@ -995,7 +1006,7 @@ class Card {
       } catch (error) {
         return;
       }
-      
+
       // needed
       let parentHtml = parentUrl.split('/').pop().split(".")[0];
 
@@ -1005,8 +1016,9 @@ class Card {
     }
 
     let breadcrumbs = '';
-
+    let isFound = false;
     while (true) {
+      isFound = false;
       if (target == null) break;
       for (let name in directory) {
         if (name != target) continue;
@@ -1017,18 +1029,18 @@ class Card {
 
         // Adds to crumbs
         breadcrumbs = `<a href="${directory[name].url}" class="link">${directory[name].name}</a> » ` + breadcrumbs;
+        isFound = true;
         break;
       }
+      if (!isFound) break;
     }
 
-    // Step 1. Validation. Checks if [crumbs] is empty
-    let crumbDiv = document.getElementById("page-breadcrumbs");
-    if (!crumbs) {
+    // Tag does not exists.
+    if (breadcrumbs == '') {
       crumbDiv.classList.add('hide');
       return;
     }
-
-    // Step 2. Insert crumbs. Floating status. Will Change
+    // Insert crumbs. Floating status. Will Change
     //         on electron port.
     crumbDiv.classList.remove('hide');
     crumbDiv.innerHTML = '<span>' + breadcrumbs + `<a href="#" class="link">${pageData.title}</a></span>`;

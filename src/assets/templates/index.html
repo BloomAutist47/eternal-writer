@@ -88,11 +88,7 @@
 
         // Gets Input Url
         toggleScrollbarVisibility();
-        if (window.location.search != "") {
-          renderPage();
-        } else {
-          renderPage(true);
-        }
+        renderPage();
       })
       .then(() => {
         document.getElementsByTagName('body')[0].classList.remove('hide');
