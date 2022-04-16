@@ -31,8 +31,10 @@ $notifyError: #eb4034;
 @import './utility';
 @import './easymde.min';
 @import './jsoneditor';
+@import './loadingscreen';
+@import './collapsible';
 
-// CSS                  
+// CSS           
 @mixin center {    
   display: grid;
   place-items: center;
@@ -87,18 +89,20 @@ $notifyError: #eb4034;
 }
 
 body {
-  @include center();
+  // @include center(); 
   background-color: $BG;
   color: $FontColor1;
   font-family: $fontFamily;
   font-weight: 400;
   font-size: small;
+
   .body-card {
     width: 60em;
     background-color: $Card;
     color: $FontColor1;
     border-radius: 0.5em;
     padding: 2em 3em;
+    overflow: auto !important;
   }
 
   #page-tags {

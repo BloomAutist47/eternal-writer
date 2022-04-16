@@ -22,7 +22,12 @@
             </tr>
             <tr>
               <td class="input-title">Parent</td>
-              <td class="input-box"><input type="text" placeholder="Parent page name for breadcrumbs" id="editorParent"></td>
+              <td class="input-box"><input type="text" placeholder="Parent page name for breadcrumbs" id="editorParent" list="pageNames">
+                <!-- <datalist id="cityname">
+                  <option value="Boston">asdasd</option>
+                  <option value="Cambridge">sssss</option>
+                </datalist> -->
+              </td>
             </tr>
             <tr>
               <td class="input-title down-border-radius">Tags</td>
@@ -91,7 +96,7 @@
 
           <div>
             <button class="btn btn-one mr-1" onclick="pageEditor.profileEditor.collapse()">Collapse</button>
-            <button class="btn btn-one"  onclick="pageEditor.profileEditor.expand()">Expand</button>
+            <button class="btn btn-one" onclick="pageEditor.profileEditor.expand()">Expand</button>
           </div>
         </div>
 

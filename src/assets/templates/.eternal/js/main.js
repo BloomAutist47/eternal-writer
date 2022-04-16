@@ -1,50 +1,78 @@
+/*jshint esversion: 8 */
+
 // Global Variables
 var directory; // Obj containing directory.json
 var idList = []; // List of randomly generated ids
-var pageCard; // Contains the page card Class
-var pageEditor;
-var editorData; // Contains parsed data for the editor
-var isEditorChanged = false;
+var hList = {};
+var pageUrl = '';
+
 var notificationGreen;
 var notificationRed;
+
+var pageCard; // Contains the page card Class
+
+// Editor Variables
+var editorData; // Contains parsed data for the editor
+var pageEditor; // The Editor Class
+var sideBar;
+var isEditorChanged = false;
 var tempProfilesData = {};
 
-function renderPage() {
-  isEditorChanged = false;
+function renderPage(renderDefault = false) {
   let urlParams = new URLSearchParams(window.location.search);
-  let inputUrl = urlParams.get('p').trim();
+  pageUrl = urlParams.get('p').replace(/\s/g, "-");
+
+  // If Home page
+  if (!pageUrl) pageUrl = 'home';
+  pageUrl.trim();
 
   // Renders Page
-  pageCard = new Card()
-  pageCard.renderFromHTML(inputUrl)
+  pageCard = new Card();
+  pageCard.renderFromHTML(pageUrl)
+    .then((result) => {
+      if (!result) return;
+      createNotifications();
+      renderEditor();
+    });
+}
+
+function renderEditor() {
+  // Renders Editor
+  pageEditor = new PageEditor(pageCard);
+  pageEditor.loadEditor()
     .then(() => {
-      notificationGreen = window.createNotification({
-        theme: 'success'
-      });
-
-      notificationRed = window.createNotification({
-        theme: 'error'
-      });
-
-      // Renders Editor
-      pageEditor = new PageEditor(pageCard)
-      pageEditor.loadEditor()
-        .then(() => {
+      isEditorChanged = false;
+      tempProfilesData = {};
+    })
+    .then(() => {
+      getAsset('editor-sidebar.html')
+        .then(data => {
+          document.getElementById('page-editor-sidebar').innerHTML = data.trim();
+          sideBar = new SideBar();
 
           // Others
-          // document.getElementById('modalbtn').click();
-          // document.getElementById('editorAreaBtns').getElementsByTagName('button')[1].click()
-          isEditorChanged = false;
-          tempProfilesData = {};
-        })
-    })
+          openModal('editor-modal');
+          document.getElementById('editorAreaBtns').getElementsByTagName('button')[1].click();
+
+        });
+    });
+
+
 }
 
-function printIDList() {
-  console.log(idList);
+
+function createNotifications() {
+  notificationGreen = window.createNotification({
+    theme: 'success'
+  });
+
+  notificationRed = window.createNotification({
+    theme: 'error'
+  });
+
 }
 
-// Functions
+// Functions3
 /**
  * Notification Pop-Up.
  *
@@ -93,13 +121,13 @@ function getAsset(filename) {
         .then(response => response.text())
         .then(data => {
           return data;
-        })
+        });
     case 'json':
       return fetch(`.eternal/${filename}`)
         .then(response => response.json())
         .then(data => {
           return data;
-        })
+        });
     default:
       break;
   }
@@ -123,7 +151,7 @@ function getPage(fileUrl) {
         return null;
       }
       return resp;
-    })
+    });
 }
 
 /**
@@ -168,8 +196,8 @@ function isObjEmpty(object) {
  * @return {boolean}  true - vars is an Object. false - not.
  */
 function isObj(obj) {
-  if (typeof obj === 'object') return true
-  return false
+  if (typeof obj === 'object') return true;
+  return false;
 }
 
 /**
@@ -203,8 +231,8 @@ function makeid(length) {
     for (let i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-    if (idList.includes(result)) continue
-    idList.push(result)
+    if (idList.includes(result)) continue;
+    idList.push(result);
     return result;
   }
 }
@@ -225,21 +253,21 @@ function openTab(btn, tabId, contentGroupClass, btnGroupId) {
 
   // Removes Active Class on other Tabs
   for (const tab of tabs) {
-    tab.style.display = "none"
+    tab.style.display = "none";
   }
 
-  let btngroup = document.getElementById(btnGroupId).getElementsByTagName('button')
+  let btngroup = document.getElementById(btnGroupId).getElementsByTagName('button');
   for (const gbtn of btngroup) {
-    if (gbtn == btn) continue
-    if (!gbtn.classList.contains("tab-active")) continue
-    gbtn.classList.remove("tab-active")
+    if (gbtn == btn) continue;
+    if (!gbtn.classList.contains("tab-active")) continue;
+    gbtn.classList.remove("tab-active");
   }
 
   // Adds Active Class on Current Tab
-  let tab_content = document.getElementById(tabId)
-  tab_content.style.display = "block"
+  let tab_content = document.getElementById(tabId);
+  tab_content.style.display = "block";
 
-  btn.classList.add("tab-active")
+  btn.classList.add("tab-active");
 }
 
 
@@ -256,34 +284,45 @@ function openTab(btn, tabId, contentGroupClass, btnGroupId) {
  */
 function createTabs(btnGroupId, tabIdsObj) {
 
-  const content_group_class = makeid(7)
-  const btn_group_id = makeid(7)
+  const content_group_class = makeid(7);
+  const btn_group_id = makeid(7);
 
-  const div = document.getElementById(btnGroupId)
-  const btn_div = document.createElement("div")
-  btn_div.id = btn_group_id
+  const div = document.getElementById(btnGroupId);
+  const btn_div = document.createElement("div");
+  btn_div.id = btn_group_id;
 
-  let first = true
+  let first = true;
   for (const idObj of tabIdsObj) {
-    const elem = document.getElementById(idObj.id)
-    if (!elem) continue
-    elem.classList.add(content_group_class)
-    elem.style.display = "none"
+    const elem = document.getElementById(idObj.id);
+    if (!elem) continue;
+    elem.classList.add(content_group_class);
+    elem.style.display = "none";
 
-    const btn = document.createElement("button")
-    btn.innerText = idObj.name
-    btn.setAttribute("onclick", `openTab(this, '${idObj.id}', '${content_group_class}', '${btn_group_id}')`)
-    btn.classList.add("btn", "profile-image-btn")
+    const btn = document.createElement("button");
+    btn.innerText = idObj.name;
+    btn.setAttribute("onclick", `openTab(this, '${idObj.id}', '${content_group_class}', '${btn_group_id}')`);
+    btn.classList.add("btn", "profile-image-btn");
 
     if (first == true) {
-      btn.classList.add("tab-active")
-      elem.style.display = "block"
-      first = false
+      btn.classList.add("tab-active");
+      elem.style.display = "block";
+      first = false;
     }
 
-    btn_div.appendChild(btn)
+    btn_div.appendChild(btn);
   }
-  div.appendChild(btn_div)
+  div.appendChild(btn_div);
+}
+
+function toggleScrollbarVisibility() {
+
+  document.getElementsByTagName("body")[0].classList.toggle("disable-srolling");
+  document.getElementsByTagName("html")[0].classList.toggle("disable-srolling");
+}
+
+function removeScrollbarVisibility() {
+  document.getElementsByTagName("body")[0].classList.remove("disable-srolling");
+  document.getElementsByTagName("html")[0].classList.remove("disable-srolling");
 }
 
 /**
@@ -297,25 +336,23 @@ function createTabs(btnGroupId, tabIdsObj) {
  */
 function openModal(modalID, renderPageAgain = false) {
   if (renderPageAgain && isEditorChanged) {
-    renderPage()
+    renderPage();
   }
 
-  let modal = document.getElementById(modalID)
-  modal.classList.toggle('modal-visible')
-    // Hide scrollbar
-  document.getElementsByTagName("body")[0].classList.toggle("disable-srolling")
-  document.getElementsByTagName("html")[0].classList.toggle("disable-srolling")
+  let modal = document.getElementById(modalID);
+  modal.classList.toggle('modal-visible');
+  // Hide scrollbar
+  toggleScrollbarVisibility();
 
   // Exits modal if clicked outsie
   if (modal.onclick != null) return;
   modal.onclick = (event) => {
     if (event.target == modal) {
-      modal.classList.remove('modal-visible')
-        // Reveal Scrollbar
-      document.getElementsByTagName("body")[0].classList.remove("disable-srolling")
-      document.getElementsByTagName("html")[0].classList.remove("disable-srolling")
+      modal.classList.remove('modal-visible');
+      // Reveal Scrollbar
+      removeScrollbarVisibility();
     }
-  }
+  };
 
 }
 
@@ -342,7 +379,7 @@ function setSpoilersVisibility(isVisible) {
 
   spoiler_div.style.display = (isVisible == true) ? "block" : 'none';
   non_spoiler_div.style.display = (isVisible == true) ? "none" : 'block';
-  localStorage["theSongOfEnderion_isSpoiler"] = isVisible;
+  localStorage.theSongOfEnderion_isSpoiler = isVisible;
   document.getElementById('spoilerTooltipTexts').innerText = (isVisible == true) ? "Hide Spoilers" : "Show Spoilers";
 }
 
@@ -393,7 +430,7 @@ class TextRenderer {
         if (h == "h1") htmlContent += '<hr>\n';
         continue;
       }
-      if (value == "</div>" || value.match(/\<div(.+?)\>/)) {
+      if (value == "</div>" || value.match(/<div(.+?)\>/)) {
         htmlContent += value;
         continue;
       }
@@ -414,9 +451,15 @@ class TextRenderer {
    */
   renderWordBold(value) {
     const bold_words = value.match(/\*\*(.*?)\*\*/g);
+    const bold_words2 = value.match(/\_\_(.*?)\_\_/g);
     if (bold_words) {
       for (const word of bold_words) {
         value = value.replace(word, `<b>${word.replace(/\*/g, "").trim()}</b>`);
+      }
+    }
+    if (bold_words2) {
+      for (const word of bold_words2) {
+        value = value.replace(word, `<b>${word.replace(/\_/g, "").trim()}</b>`);
       }
     }
     return value;
@@ -440,6 +483,13 @@ class TextRenderer {
         value = value.replace(word, `<i>${word.replace(/\*/g, "").trim()}</i>`);
       }
     }
+    const italic_words2 = value.match(/\_(.*?)\_/g);
+    if (italic_words2) {
+      for (const word of italic_words2) {
+        if (word == "**") continue;
+        value = value.replace(word, `<i>${word.replace(/\_/g, "").trim()}</i>`);
+      }
+    }
     return value;
   }
 
@@ -450,8 +500,9 @@ class Card {
 
   async renderFromHTML(inputUrl) {
     let htmlData = await this.findFileData(inputUrl);
-    if (!htmlData) return;
-    await this.renderPage(htmlData)
+    if (htmlData == false) return false;
+    await this.renderPage(htmlData);
+    return true;
   }
 
   /**
@@ -480,6 +531,9 @@ class Card {
 
     // Create Page Tabs
     this.createPageTabs();
+
+    // Create Collapsibles
+    this.createCollapsibles();
   }
 
   /**
@@ -495,7 +549,7 @@ class Card {
   async loadPage(htmlData, readScripts) {
     // Variables
 
-    idList = []
+    idList = [];
 
     // Parses the data into a node
     const splitData = htmlData.split('<!-- File Content -->');
@@ -516,9 +570,9 @@ class Card {
     let pageContent = document.getElementById('page-content');
     pageContent.innerHTML = rt.renderText(contentData);
 
-    this.setTitle(pageData.title)
-    this.setTags(pageData.tags)
-    this.setBreadCrumbs(pageData.parent)
+    this.setTitle(pageData.title);
+    this.setTags(pageData.tags);
+    this.setBreadCrumbs("load", pageData.parent);
   }
 
 
@@ -543,7 +597,7 @@ class Card {
         fetch(script.src).then(data => {
           data.text().then(r => {
             eval(r);
-          })
+          });
         });
       }
       // To not repeat the element
@@ -562,11 +616,12 @@ class Card {
    * @param {string}   inputUrl  e.g. ethan-morales
    * @return {string}  A string of the html file.
    */
-  async findFileData(inputUrl) {
+  async findFileData(inputUrl_) {
     // Finds Page data
+    let inputUrl = inputUrl_.toLocaleLowerCase();
     for (const pageUrl in directory) {
       if (pageUrl == inputUrl) {
-        let result = await getPage(directory[inputUrl]["url"])
+        let result = await getPage(directory[inputUrl].url);
         return result;
       }
     }
@@ -604,8 +659,9 @@ class Card {
    */
   createTOC() {
     const divs = document.getElementsByClassName("page-tab");
-    for (const contdiv of divs) {
+    if (!divs) return;
 
+    for (const contdiv of divs) {
       let divText = contdiv.innerHTML.trim();
 
       if (divText == '') continue;
@@ -614,7 +670,9 @@ class Card {
       let headers = contdiv.getElementsByClassName("h");
       let toc = `<div class="toc"><p><b>Table of Contents</b></p>`;
       let alreadyDone = false;
+      let parentId = '';
       for (const head of headers) {
+        if (!parentId) parentId = head.parentNode.id.split("-")[0];
 
         // Add ID
         if (head.id != '') {
@@ -622,7 +680,14 @@ class Card {
           break;
         }
 
-        head.id = head.textContent.replace(" ", "_").toLocaleLowerCase() + "-" + makeid(8);
+        head.id = parentId + "-" + head.textContent.trim().replace(" ", "-").toLocaleLowerCase();
+        if (idList.includes(head.id)) {
+          if (!hList.hasOwnProperty(head.id)) hList[head.id] = 0;
+          hList[head.id] += 1;
+          head.id += "-" + hList[head.id];
+
+        }
+        idList.push(head.id);
 
         // Create links
         toc += `<a href="#${head.id}" class="toc-${head.tagName}">${head.innerText}</a><br>\n`;
@@ -646,7 +711,6 @@ class Card {
    */
   createProfileBox() {
     // Validation Check
-    if (!pageData.functions.hasOwnProperty('createProfileBox') && pageData.functions.createProfileBox != true) return;
     if (isObjEmpty(profileData)) return;
 
     for (const pageTabId in profileData) {
@@ -665,7 +729,7 @@ class Card {
       div.classList.add("float-end", "profile-box");
 
       // Create Title
-      div.insertAdjacentHTML('beforeend', `<span class="profile-title bold">${profle_obj['Title']}</span>`);
+      div.insertAdjacentHTML('beforeend', `<span class="profile-title bold">${profle_obj.Title}</span>`);
 
       // Create Image Tabs
       if (profle_obj.hasOwnProperty('Image')) {
@@ -684,7 +748,7 @@ class Card {
 
         // Create Buttons and Images
         let first = true;
-        for (const image in profle_obj['Image']) {
+        for (const image in profle_obj.Image) {
 
           // Create Buttons
           image_ids[image] = image.replace(" ", "_").toLocaleLowerCase() + "-" + makeid(8);
@@ -708,7 +772,7 @@ class Card {
           // Create Image Div
           div.insertAdjacentHTML('beforeend', `
                 <div id="${image_ids[image]}" class="green-box profile-image ${btn_content_id}" style="display: ${display_style};">
-                  <img src="${profle_obj['Image'][image]}" class="img-fluid mx-auto d-block" alt="...">
+                  <img src="${profle_obj.Image[image]}" class="img-fluid mx-auto d-block" alt="...">
                 </div>`);
         }
       }
@@ -720,34 +784,34 @@ class Card {
 
       const tbody = document.createElement("tbody");
 
-      for (const category_ in profle_obj['Content']) {
-        let category = category_.trim()
-        if (!isObj(profle_obj['Content'][category])) continue
+      for (const category_ in profle_obj.Content) {
+        let category = category_.trim();
+        if (!isObj(profle_obj.Content[category])) continue;
 
         // Category Name
         if (category.toLowerCase() != "desc") {
-          tbody.insertAdjacentHTML('beforeend', `<tr><td class="bold profile-category" colspan="2">${category}</td></tr>`)
+          tbody.insertAdjacentHTML('beforeend', `<tr><td class="bold profile-category" colspan="2">${category}</td></tr>`);
         }
 
         // Category Row-Cell values
-        for (const cellName in profle_obj['Content'][category]) {
-          let cellValue = profle_obj['Content'][category][cellName];
+        for (const cellName in profle_obj.Content[category]) {
+          let cellValue = profle_obj.Content[category][cellName];
 
           // Validation Check
-          if (!Array.isArray(cellValue) && isObj(cellValue)) continuel
+          if (!Array.isArray(cellValue) && isObj(cellValue)) continue;
           if (category == "Image") continue;
 
           // Cell Content
-          let cellContent = ''
+          let cellContent = '';
 
           // Checks if value contains a list
           if (Array.isArray(cellValue)) {
             for (const item of cellValue) {
-              if (isObj(item)) continue
+              if (isObj(item)) continue;
               if (isNaN(item) && item.includes("|")) {
                 let rawSplit = item.split("|");
                 cellContent = `• <a href=${rawSplit[1]}>${rawSplit[0]}</a> <br>`;
-                continue
+                continue;
               }
               cellContent += `• ${item} <br>`;
 
@@ -767,7 +831,7 @@ class Card {
             <td class="bold profile-cell" style="width: 35%;">${cellName}</td>
             <td class="profile-cell">${cellContent}</td>
           </tr>
-          `)
+          `);
         }
 
       }
@@ -776,9 +840,9 @@ class Card {
       table.appendChild(tbody);
       div.appendChild(table);
 
-      let parentDiv = document.createElement("div")
-      parentDiv.classList.add("profile-box-parent")
-      parentDiv.appendChild(div)
+      let parentDiv = document.createElement("div");
+      parentDiv.classList.add("profile-box-parent");
+      parentDiv.appendChild(div);
 
       divToPlaceProfileBoxIn.prepend(parentDiv);
     }
@@ -794,13 +858,6 @@ class Card {
    * @access     private
    */
   createSpoiler() {
-    if (!pageData.functions.hasOwnProperty('createSpoilers') && pageData.functions.createSpoilers != true) {
-      // Hides spoiler div if createSpoilers is not enabled
-      let spoilerDiv = document.getElementById('spoiler');
-      if (spoilerDiv) spoilerDiv.style.display = "none";
-      return;
-    }
-
     const spoilerDiv = document.getElementById("spoiler-button");
     spoilerDiv.classList.add("float-end", "tooltipStyle");
     spoilerDiv.innerHTML = `
@@ -812,12 +869,20 @@ class Card {
       <span class="tooltipStyletext" id="spoilerTooltipTexts">Show Spoilers</span>`;
 
 
-    if (localStorage["theSongOfEnderion_isSpoiler"] == 'true') {
+    if (localStorage.theSongOfEnderion_isSpoiler == 'true') {
       spoilerDiv.getElementsByTagName('input')[0].checked = true;
-      setSpoilersVisibility(true)
+      setSpoilersVisibility(true);
     } else {
-      setSpoilersVisibility(false)
+      setSpoilersVisibility(false);
     }
+
+    if (!pageData.hasOwnProperty('createSpoilers') || pageData.createSpoilers == false) {
+      // Hides spoiler div if createSpoilers is not enabled
+      let spoilerDiv = document.getElementById('spoiler-button');
+      if (spoilerDiv) spoilerDiv.classList.add('hide');
+      return;
+    }
+
   }
 
   /**
@@ -829,25 +894,25 @@ class Card {
    * @access     private
    */
   createPageTabs() {
-    if (isObjEmpty(pageData.fileStructure)) return
+    if (isObjEmpty(pageData.fileStructure)) return;
 
     for (const area in pageData.fileStructure) {
-      if (isObjEmpty(pageData.fileStructure[area])) continue
-      let div = document.getElementById(area)
+      if (isObjEmpty(pageData.fileStructure[area])) continue;
+      let div = document.getElementById(area);
 
-      let btn = document.createElement('div')
-      btn.id = area + "-page-tab-button-" + makeid(5)
-      div.prepend(btn)
+      let btn = document.createElement('div');
+      btn.id = area + "-page-tab-button-" + makeid(5);
+      div.prepend(btn);
 
-      let tabsObj = []
+      let tabsObj = [];
 
       for (const tabId in pageData.fileStructure[area]) {
-        tabsObj.push({ name: pageData.fileStructure[area][tabId], id: tabId })
+        tabsObj.push({ name: pageData.fileStructure[area][tabId], id: tabId });
       }
       if (tabsObj.length == 1) {
         btn.style.display = "none";
       }
-      createTabs(btn.id, tabsObj)
+      createTabs(btn.id, tabsObj);
     }
   }
 
@@ -863,6 +928,26 @@ class Card {
     document.getElementById('page-title').getElementsByTagName('h1')[0].innerText = name;
   }
 
+  createCollapsibles() {
+    let collapsibles = document.getElementsByClassName("collapsible");
+    if (!collapsibles) return;
+
+    for (const col of collapsibles) {
+      col.addEventListener("click", () => {
+        this.classList.toggle("collapsible-active");
+        let content = this.nextElementSibling;
+        if (content.style.maxHeight) {
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        }
+      });
+    }
+  }
+
+
+
+
   /**
    * Set Tags
    *
@@ -876,7 +961,7 @@ class Card {
     // Step 1. Validation. Checks if [tags] is empty
     if (!tags) {
       document.getElementById('page-tags').style.display = 'none';
-      return
+      return;
     }
 
     // Step 2. Process tags
@@ -900,19 +985,56 @@ class Card {
    * @access     public
    * @param {string}   crumbs   parent page name.
    */
-  setBreadCrumbs(crumbs) {
+  setBreadCrumbs(mode, crumbs) {
+    let target = '';
+    let parentUrl;
+    if (mode == "editor") {
+      let parentName = document.getElementById('editorParent').value;
+      try {
+        parentUrl = document.querySelector('option[value="' + parentName + '"]').label;
+      } catch (error) {
+        return;
+      }
+      
+      // needed
+      let parentHtml = parentUrl.split('/').pop().split(".")[0];
+
+      target = parentHtml;
+    } else {
+      target = crumbs.trim();
+    }
+
+    let breadcrumbs = '';
+
+    while (true) {
+      if (target == null) break;
+      for (let name in directory) {
+        if (name != target) continue;
+
+        // Checks for chain parent
+        if (directory[name].parent != "") target = directory[name].parent;
+        else target = null;
+
+        // Adds to crumbs
+        breadcrumbs = `<a href="${directory[name].url}" class="link">${directory[name].name}</a> » ` + breadcrumbs;
+        break;
+      }
+    }
+
     // Step 1. Validation. Checks if [crumbs] is empty
     let crumbDiv = document.getElementById("page-breadcrumbs");
     if (!crumbs) {
-      crumbDiv.style.display = "none";
-      return
+      crumbDiv.classList.add('hide');
+      return;
     }
 
     // Step 2. Insert crumbs. Floating status. Will Change
     //         on electron port.
-    crumbDiv.style.display = "block";
-    crumbDiv.innerText = crumbs;
+    crumbDiv.classList.remove('hide');
+    crumbDiv.innerHTML = '<span>' + breadcrumbs + `<a href="#" class="link">${pageData.title}</a></span>`;
   }
+
+
 
   /**
    * Set Spoilers Status
@@ -923,10 +1045,19 @@ class Card {
    * @param {boolean}   isVisible   true - enabled. false - disabled.
    */
   setSpoilersStatus(isVisible) {
-    pageData.functions.createSpoilers = isVisible;
+    pageData.createSpoilers = isVisible;
     let checkbox = document.getElementById('spoilerBoxInputPage');
-    checkbox.checked = isVisible;
-    setSpoilersVisibility(isVisible);
+    if (localStorage.theSongOfEnderion_isSpoiler == 'true') {
+      checkbox.checked = true;
+      setSpoilersVisibility(true);
+    } else {
+      checkbox.checked = false;
+      setSpoilersVisibility(false);
+    }
+    if (!isVisible) {
+      setSpoilersVisibility(false);
+    }
+
     document.getElementById('spoiler-button').style.display = (isVisible == true) ? "block" : "none";
   }
 
@@ -940,7 +1071,7 @@ class Card {
    */
   renameTab(area, oldTabId, newTab) {
     let fskeys = Object.keys(pageData.fileStructure[area]);
-    let index = fskeys.indexOf(oldTabId)
+    let index = fskeys.indexOf(oldTabId);
 
     fskeys.splice(index, 1);
 
@@ -948,14 +1079,13 @@ class Card {
     keyValues.splice(index, 1);
 
     keyValues.splice(index, 0, [newTab.id, newTab.name]); // insert key value at the index you want like 1.
-    pageData.fileStructure[area] = Object.fromEntries(keyValues) // convert key values to obj {key1: "value1", newKey: "newValue", key2: "value2"}
+    pageData.fileStructure[area] = Object.fromEntries(keyValues); // convert key values to obj {key1: "value1", newKey: "newValue", key2: "value2"}
 
     if (profileData.hasOwnProperty(oldTabId)) {
       let x = profileData[oldTabId];
       delete profileData[oldTabId];
 
       profileData[newTab.id] = x;
-      console.log(profileData);
     }
   }
 
@@ -991,14 +1121,13 @@ class Card {
     tabDiv.classList.add("page-tab");
 
     editorData.getElementById(area).appendChild(tabDiv);
-    console.log(tabID + " " + tabName);
   }
 }
 
 class PageEditor {
   constructor(card) {
     this.card = card;
-    this.filestructure = {};;
+    this.filestructure = {};
 
     this.editorAreaIDs = [
       "editorContentDiv",
@@ -1007,16 +1136,15 @@ class PageEditor {
     ];
 
     // Manage tab
-    this.manageTabSelected;
-    this.profileTabSelected;
-    this.profileEditor;
+    // this.manageTabSelected;
+    // this.profileTabSelected;
+    // this.profileEditor;
   }
 
   loadEditor() {
     return getAsset('editor.html')
       .then(data => {
         document.getElementById('page-editor').innerHTML = data;
-        // document.getElementById('page-editor').insertAdjacentHTML('beforeend', `<button id="modalbtn" onclick="openModal('editor-modal')">open modal</button>`);
 
         // Create Spoiler and nonspoiler Tabs
         createTabs('editor-content-spoiler-tab-btns', [{
@@ -1032,19 +1160,22 @@ class PageEditor {
         // let pageData = pageData;
 
         // Spoiler Switch
-        if (pageData.functions.hasOwnProperty('createSpoilers') && pageData.functions.createSpoilers == true) {
-          document.getElementById('editorSpoilerCheck').checked = true
-          this.showSpoilers()
+        if (pageData.hasOwnProperty('createSpoilers') && pageData.createSpoilers == true) {
+          document.getElementById('editorSpoilerCheck').checked = true;
+          this.showSpoilers();
         }
+
+        // Breadcrmbs dropdown
+        this.generateBreadCrumbs();
 
         // Content Areas
         this.generateTextArea('spoiler');
         this.generateTextArea('nonspoiler');
 
         // Meta Area
-        document.getElementById('editorPageTitle').value = pageData.title
-        document.getElementById('editorParent').value = pageData.parent
-        document.getElementById('editorTags').value = pageData.tags
+        document.getElementById('editorPageTitle').value = pageData.title;
+        document.getElementById('editorParent').value = pageData.parent;
+        document.getElementById('editorTags').value = pageData.tags;
 
         // Manage Tabs Area
         this.generateTabArea('managetab');
@@ -1052,19 +1183,20 @@ class PageEditor {
 
         // Create Profile 
         this.profileEditor = new ProfileEditor(this.profileTabSelected.value);
-      })
+      });
   }
 
   saveEditor() {
 
     // Save Profile Data
     Object.assign(profileData, tempProfilesData);
-    
+    console.log(profileData);
+
     // Save Content
     let htmlContent = '<!-- File Content -->\n\n';
 
     for (const area in this.filestructure) {
-      let innerValue = ''
+      let innerValue = '';
 
       for (const tab in this.filestructure[area]) {
         let tabValue = document.getElementById(tab).value;
@@ -1073,18 +1205,20 @@ class PageEditor {
       htmlContent += `<div id="${area}">${innerValue}</div>\n`;
     }
 
+    // Renders the page again
     this.card.renderPage(htmlContent, false)
       .then(() => {
+
         // Save Metadata
         this.card.setTitle(document.getElementById('editorPageTitle').value);
         this.card.setTags(document.getElementById('editorTags').value);
-        this.card.setBreadCrumbs(document.getElementById('editorParent').value);
+        this.card.setBreadCrumbs("editor", true);
         this.card.setSpoilersStatus(document.getElementById('editorSpoilerCheck').checked);
 
         notify("success", "Successful Save", "Page has been re-rendered.");
         isEditorChanged = false;
         tempProfilesData = {};
-      })
+      });
   }
 
   generateMDEditor(textarea, initialValue) {
@@ -1140,7 +1274,7 @@ class PageEditor {
       this.filestructure[area][textarea.id] = {
         htmlName: pageData.fileStructure[area][tab],
         htmlId: tab,
-      }
+      };
     }
 
     createTabs(`editor-${area}-tab-btns`, tabs);
@@ -1188,6 +1322,23 @@ class PageEditor {
     }
 
   }
+
+  generateBreadCrumbs() {
+
+    let datalist = document.createElement('datalist');
+    datalist.id = 'pageNames';
+
+    for (const page in directory) {
+      if (page == pageUrl) continue;
+      datalist.insertAdjacentHTML(`beforeend`, `<option value="${directory[page].name}">${directory[page].url}</option>`);
+    }
+
+    insertAfter(datalist, document.getElementById('editorParent'));
+
+  }
+
+
+
   switchEditorArea(targetBtn, targetId) {
     let btns = document.getElementById('editorAreaBtns').getElementsByTagName('button');
 
@@ -1204,7 +1355,7 @@ class PageEditor {
     for (const areaID of this.editorAreaIDs) {
       if (areaID == targetId) {
         document.getElementById(areaID).classList.remove('hide');
-        continue
+        continue;
       }
       document.getElementById(areaID).classList.add('hide');
     }
@@ -1234,7 +1385,6 @@ class PageEditor {
   }
   tabSelectedOption(sel) {
     this.manageTabSelected = sel.options[sel.selectedIndex];
-    console.log(this.manageTabSelected);
     document.getElementById('tabReNameInput').value = this.manageTabSelected.innerText;
   }
 
@@ -1283,7 +1433,7 @@ class PageEditor {
     let area = this.tabGetSelectedArea();
 
     if (Object.keys(pageData.fileStructure[area]).length == 1) {
-      notify("error", "Removal Failed", "Content Area must have atleast one textarea.")
+      notify("error", "Removal Failed", "Content Area must have atleast one textarea.");
       return;
     }
 
@@ -1356,11 +1506,10 @@ class PageEditor {
       this.profileEditor.setData(profileData[profileId]);
       this.profileRemoveDisable(profileId);
       return;
-    }
-    else if (check.checked && !profileData.hasOwnProperty(profileId)) {
+    } else if (check.checked && !profileData.hasOwnProperty(profileId)) {
       this.profileEditor.insertGeneric();
       tempProfilesData[profileId] = this.profileEditor.initialValue();
-      this.profileRemoveDisable(profileId)
+      this.profileRemoveDisable(profileId);
       return;
     } else if (check.checked && !tempProfilesData.hasOwnProperty(profileId)) {
       this.profileEditor.setData(tempProfilesData[profileId]);
@@ -1384,13 +1533,18 @@ class ProfileEditor {
     this.container = document.getElementById("jsoneditor");
     this.main = new JSONEditor(this.container, {
       onCreateMenu: this.onCreateMenu,
+      mode: 'tree',
+      schema: {},
+      // onValidate: ()=> {},
+      // onError: ()=> {},
       limitDragging: true,
       mainMenuBar: false,
       navigationBar: true,
       onChangeJSON: this.onChangeJSON,
+      enableSort: false,
     });
     this.container.style.width = "100%";
-    this.container.style.height = 'fit-content';
+    this.container.style.height = '100%';
 
     if (profileData.hasOwnProperty(defaultProfileID)) {
       this.main.set(profileData[defaultProfileID]);
@@ -1398,8 +1552,10 @@ class ProfileEditor {
       this.main.set({});
     }
 
-    this.main.expandAll();
+    // this.main.expandAll();
   }
+
+
 
   printData() {
     console.log(JSON.stringify(this.main.get(), null, 2));
@@ -1482,7 +1638,7 @@ class ProfileEditor {
   }
 
   insertGeneric() {
-    this.main.set(this.initialValue())
+    this.main.set(this.initialValue());
   }
 
   initialValue() {
@@ -1542,6 +1698,60 @@ class ProfileEditor {
     }
     if (profileData.hasOwnProperty(id)) {
       profileData[id] = json;
+    }
+  }
+}
+
+
+class SideBar {
+  constructor() {
+    this.div = document.getElementById('page-editor-sidebar-btns');
+    this.main = document.getElementById('page-editor-sidebar');
+    this.div.insertAdjacentHTML('beforeend', `
+    <button class="btn btn-one floating-btn" onclick="sideBar.open()">≡</button><br>
+    <button class="btn btn-one floating-btn" onclick="openModal('editor-modal')">⚙</button>
+    `);
+
+
+
+    // document.onkeydown = function(e) {
+    //   console.log(e)
+    //   switch (e.code) {
+    //     case 'KeyF': //Your Code Here (13 is ascii code for 'ENTER')
+    //       this.open();
+    //       break;
+    //   }
+    // }
+
+  }
+  open() {
+    console.log("ess");
+    this.main.classList.remove('hide');
+  }
+  close() {
+    this.main.classList.add('hide');
+  }
+
+  onclick(item) {
+    this.close();
+    switch (item) {
+      case 'editPage':
+        openModal('editor-modal');
+        break;
+      case 'deletePage':
+        break;
+      case 'backLinks':
+        break;
+      case 'pageSource':
+        break;
+      case 'wanted':
+        break;
+      case 'orphaned':
+        break;
+      case 'newPage':
+        break;
+      default:
+        break;
     }
   }
 }

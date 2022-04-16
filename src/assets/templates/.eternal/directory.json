@@ -1,5 +1,32 @@
 {
-    "story-a": {"name": "Ethan Morales", "url": "story/story-a.html"},
-    "story-b": {"name": "Story B", "url": "story/story-b.html"},
-    "story-c": {"name": "Story C", "url": "story/story-c.html"}
+    "home": {
+        "name": "Home",
+        "url": "content/home.html",
+        "parent": ""
+    },
+    "ethan-morales": {
+        "name": "Ethan Morales",
+        "url": "content/story/ethan-morales.html",
+        "parent": "tboah-characters"
+    },
+    "tboah-characters": {
+        "name": "Characters",
+        "url": "content/story/tboah-characters.html",
+        "parent": "tboah"
+    },
+    "tboah": {
+        "name": "The Birth of a Hero",
+        "url": "content/story/tboah.html",
+        "parent": ""
+    },
+    "story-b": {
+        "name": "Story B",
+        "url": "content/story/story-b.html",
+        "parent": "story-c"
+    },
+    "story-c": {
+        "name": "Story C",
+        "url": "content/story/story-c.html",
+        "parent": ""
+    }
 }
