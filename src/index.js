@@ -84,7 +84,19 @@ ipcMain.on("toMain", async(event, value) => {
 
   // Render Them?
   if (value.name == 'project:render') {
+
+    let fileData = "<script>\nwindow.pageData = " + JSON.stringify(value.data.pageData, null, 2);
+    fileData += "\n\nwindow.profileData = " + JSON.stringify(value.data.profileData, null, 2) + `\n</script>`;
+
+
+    let fileContent = value.data.content;
+
+    let saveData = `<!-- File Data -->\n${fileData}\n\n${fileContent}`;
+    let path = value.data.path + "\\" + value.data.pageUrl.replace(/\//g, "\\");
     console.log(value.data);
+    console.log(path);
+    fs.writeFileSync(path, saveData);
+    // console.log(data);
     return;
   }
 

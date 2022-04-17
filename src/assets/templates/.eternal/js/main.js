@@ -1,7 +1,7 @@
 /*jshint esversion: 8 */
 
 // Global Variables
-var projectId = '[[id]]';
+var projectId = 'asdasdasdasdsad';
 
 var directory; // Obj containing directory.json
 var idList = []; // List of randomly generated ids
@@ -627,9 +627,10 @@ class Card {
   async findFileData(inputUrl_) {
     // Finds Page data
     let inputUrl = inputUrl_.toLocaleLowerCase();
-    for (const pageUrl in directory) {
-      if (pageUrl == inputUrl) {
-        pageName = directory[inputUrl].url;
+    for (const pageurl in directory) {
+      if (pageurl == inputUrl) {
+        pageUrl = directory[inputUrl].url;
+        console.log(pageUrl, pageName)
         let result = await getPage(directory[inputUrl].url);
         return result;
       }
