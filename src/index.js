@@ -1,3 +1,5 @@
+/*jshint esversion: 8 */
+
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const os = require('os-utils');
@@ -10,8 +12,9 @@ if (require('electron-squirrel-startup')) {
 }
 
 var mainWindow;
+var projectPaths = {};
 
-const createWindow = () => {
+var createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -29,8 +32,6 @@ const createWindow = () => {
     }
   });
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-
-  // mainWindow.webContents.openDevTools();
 };
 
 app.on('ready', createWindow);
@@ -49,44 +50,69 @@ app.on('activate', () => {
 });
 
 // Functions
-// Placed right here
-
 ipcMain.handle('dialog:openDirectory', async() => {
   const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
-  })
+  });
   if (canceled) {
-    return
+    return;
   } else {
-    return filePaths[0]
+    return filePaths[0];
   }
-})
-
-ipcMain.handle('electronCheck', async() => {
-  console.log("YIEEH")
-  return true
-})
-
+});
 
 ipcMain.on("toMain", async(event, value) => {
 
+  // Create Project
   if (value.name == 'project:create') {
-    const filePath = value.data.path + `\\${value.data.name}\\`
+    const filePath = value.data.path + `\\${value.data.name}\\`;
     fs.copy(path.join(__dirname) + '\\assets\\templates\\', filePath, function(err, data) {
-      if (err) console.log(err);
+
+      let rawdata = fs.readFileSync(filePath + "\\.eternal\\eternal.json");
+      let json = JSON.parse(rawdata);
+      json.id = makeid(30);
+      json.projectTitle = value.data.name;
+      fs.writeFileSync(filePath + "\\.eternal\\eternal.json", JSON.stringify(json, null, 2));
+
+      let rawHtml = fs.readFileSync(filePath + "\\.eternal\\js\\main.js", 'utf8');
+
+      fs.writeFileSync(filePath + "\\.eternal\\js\\main.js", rawHtml.toString().replace("'[[id]]'", `'${json.id}'`));
+      console.log(json);
     });
-    return
+    return;
   }
 
+  // Render Them?
+  if (value.name == 'project:render') {
+    console.log(value.data);
+    return;
+  }
+
+
+  // Open Project
+  if (value.name == 'project:getID') {
+    mainWindow.webContents.send('fromMain', {name: 'path', value: projectPaths[value.data]});
+  }
+
+  // Open Project
   if (value.name == 'project:open') {
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
       properties: ['openDirectory']
-    })
+    });
     if (canceled) {
-      return
+      return;
     } else {
-      let child = new BrowserWindow({
-        parent: mainWindow,
+
+      let rawdata = fs.readFileSync(filePaths[0] + "\\.eternal\\eternal.json");
+      let json = JSON.parse(rawdata);
+
+
+      mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        autoHideMenuBar: true,
+        frame: false,
+        resizable: false,
         webPreferences: {
           nodeIntegration: false,
           contextIsolation: true,
@@ -94,23 +120,52 @@ ipcMain.on("toMain", async(event, value) => {
           worldSafeExecuteJavaScript: true,
           preload: path.join(__dirname, "js/preload.js")
         }
-      })
-      child.loadFile(filePaths[0] + "\\index.html")
-      child.show()
+      });
+      mainWindow.loadFile(filePaths[0] + "\\" + json.main);
+      mainWindow.show();
+      mainWindow.webContents.openDevTools();
+
+      projectPaths[json.id] = filePaths[0];
     }
-    return
+    return;
   }
 
 });
 
 ipcMain.on("toProcess", async(event, value) => {
   if (value == 'screen:minimize') {
-    mainWindow.minimize()
-    return
+    mainWindow.minimize();
+    return;
   }
 
   if (value == 'screen:exit') {
-    app.quit()
-    return
+    app.quit();
+    return;
   }
-})
+});
+
+
+function makeid(length) {
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  while (true) {
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+}
+
+
+
+      // createWindow = new BrowserWindow({
+      //   parent: mainWindow,
+      //   webPreferences: {
+      //     nodeIntegration: false,
+      //     contextIsolation: true,
+      //     enableRemoteModule: true,
+      //     worldSafeExecuteJavaScript: true,
+      //     preload: path.join(__dirname, "js/preload.js")
+      //   }
+      // });

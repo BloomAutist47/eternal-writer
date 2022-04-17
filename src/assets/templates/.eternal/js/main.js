@@ -1,10 +1,14 @@
 /*jshint esversion: 8 */
 
 // Global Variables
+var projectId = '[[id]]';
+
 var directory; // Obj containing directory.json
 var idList = []; // List of randomly generated ids
 var hList = {};
+var pageName = '';
 var pageUrl = '';
+var projectPath = '';
 
 var notificationGreen;
 var notificationRed;
@@ -18,50 +22,51 @@ var sideBar;
 var isEditorChanged = false;
 var tempProfilesData = {};
 
-function renderPage() {
-  if (window.location.search != "") {
-    let urlParams = new URLSearchParams(window.location.search);
-    pageUrl = urlParams.get('p').replace(/\s/g, "-");
-    if (pageUrl) pageUrl.trim();
-  } else {
-    // If Home page
-    pageUrl = 'home';
+function goTo(link) {
+  renderPage(link);
+}
 
+function renderPage(url = '') {
+  if (url) {
+    pageName = url;
+  } else {
+    if (window.location.search != "") {
+      let urlParams = new URLSearchParams(window.location.search);
+      pageName = urlParams.get('p').replace(/\s/g, "-");
+      if (pageName) pageName.trim();
+    } else {
+      // If Home page
+      pageName = 'home';
+
+    }
   }
+
 
   // Renders Page
   pageCard = new Card();
-  pageCard.renderFromHTML(pageUrl)
+  pageCard.renderFromHTML(pageName)
     .then((result) => {
       if (!result) return;
       createNotifications();
-      renderEditor();
-    });
-}
-
-function renderEditor() {
-  // Renders Editor
-  pageEditor = new PageEditor(pageCard);
-  pageEditor.loadEditor()
-    .then(() => {
-      isEditorChanged = false;
-      tempProfilesData = {};
     })
     .then(() => {
-      getAsset('editor-sidebar.html')
-        .then(data => {
-          document.getElementById('page-editor-sidebar').innerHTML = data.trim();
-          sideBar = new SideBar();
+      var userAgent = navigator.userAgent.toLowerCase();
+      // renderEditor(true);
+      // Not electron
+      if (userAgent.indexOf(' electron/') == -1) {
+        console.log("Not on electron");
 
-          // Others
-          openModal('editor-modal');
-          document.getElementById('editorAreaBtns').getElementsByTagName('button')[1].click();
-
-        });
+        // Electron
+      } else {
+        renderEditor();
+      }
+      document.getElementsByTagName('body')[0].classList.remove('hide');
+      toggleScrollbarVisibility();
     });
 
 
 }
+
 
 
 function createNotifications() {
@@ -624,6 +629,7 @@ class Card {
     let inputUrl = inputUrl_.toLocaleLowerCase();
     for (const pageUrl in directory) {
       if (pageUrl == inputUrl) {
+        pageName = directory[inputUrl].url;
         let result = await getPage(directory[inputUrl].url);
         return result;
       }
@@ -910,7 +916,10 @@ class Card {
       let tabsObj = [];
 
       for (const tabId in pageData.fileStructure[area]) {
-        tabsObj.push({ name: pageData.fileStructure[area][tabId], id: tabId });
+        tabsObj.push({
+          name: pageData.fileStructure[area][tabId],
+          id: tabId
+        });
       }
       if (tabsObj.length == 1) {
         btn.style.display = "none";
@@ -1136,10 +1145,50 @@ class Card {
   }
 }
 
+function renderEditor(testModde = false) {
+  // Renders Editor
+  pageEditor = new PageEditor(pageCard, testModde);
+  pageEditor.loadEditor()
+    .then(() => {
+      isEditorChanged = false;
+      tempProfilesData = {};
+    })
+    .then(() => {
+      getAsset('editor-sidebar.html')
+        .then(data => {
+          document.getElementById('page-editor-sidebar').innerHTML = data.trim();
+          sideBar = new SideBar();
+
+
+
+          window.api.send('toMain', {
+            name: 'project:getID',
+            data: projectId
+          });
+
+          window.api.receive("fromMain", (data) => {
+            if (data.name == 'path') {
+              if (projectPath != '') return;
+              projectPath = data.value;
+              console.log("Path: ", projectPath);
+            }
+          });
+
+          // Others
+          // openModal('editor-modal');
+          // document.getElementById('editorAreaBtns').getElementsByTagName('button')[1].click();
+
+        });
+    });
+}
+
+// ELECTRON FUNCTIONS
+
 class PageEditor {
-  constructor(card) {
+  constructor(card, testModde) {
     this.card = card;
     this.filestructure = {};
+    this.testModde = testModde;
 
     this.editorAreaIDs = [
       "editorContentDiv",
@@ -1202,7 +1251,6 @@ class PageEditor {
 
     // Save Profile Data
     Object.assign(profileData, tempProfilesData);
-    console.log(profileData);
 
     // Save Content
     let htmlContent = '<!-- File Content -->\n\n';
@@ -1216,6 +1264,23 @@ class PageEditor {
       }
       htmlContent += `<div id="${area}">${innerValue}</div>\n`;
     }
+
+    // Save to Electron
+    if (!this.testModde) {
+      window.api.send('toMain', {
+        name: 'project:render',
+        data: {
+          content: htmlContent,
+          pageData: pageData,
+          profileData: profileData,
+          pageName: pageName,
+          pageUrl: pageUrl,
+          path: projectPath
+        }
+      });
+
+    }
+
 
     // Renders the page again
     this.card.renderPage(htmlContent, false)
@@ -1341,7 +1406,7 @@ class PageEditor {
     datalist.id = 'pageNames';
 
     for (const page in directory) {
-      if (page == pageUrl) continue;
+      if (page == pageName) continue;
       datalist.insertAdjacentHTML(`beforeend`, `<option value="${directory[page].name}">${directory[page].url}</option>`);
     }
 
@@ -1723,21 +1788,9 @@ class SideBar {
     <button class="btn btn-one floating-btn" onclick="sideBar.open()">≡</button><br>
     <button class="btn btn-one floating-btn" onclick="openModal('editor-modal')">⚙</button>
     `);
-
-
-
-    // document.onkeydown = function(e) {
-    //   console.log(e)
-    //   switch (e.code) {
-    //     case 'KeyF': //Your Code Here (13 is ascii code for 'ENTER')
-    //       this.open();
-    //       break;
-    //   }
-    // }
-
   }
+
   open() {
-    console.log("ess");
     this.main.classList.remove('hide');
   }
   close() {

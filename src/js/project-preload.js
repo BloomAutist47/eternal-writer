@@ -20,9 +20,16 @@ contextBridge.exposeInMainWorld(
             let validChannels = ["fromMain"];
             if (validChannels.includes(channel)) {
                 // Deliberately strip event as it includes `sender` 
+
                 ipcRenderer.on(channel, (event, ...args) => func(...args));
             }
         },
         selectFolder: () => ipcRenderer.invoke('dialog:openDirectory'),
     }
 );
+
+
+  window.addEventListener('DOMContentLoaded', () => {
+
+
+  });
