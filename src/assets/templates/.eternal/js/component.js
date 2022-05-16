@@ -123,7 +123,9 @@ const header = {
           <div class="dropdown" v-for="(value, name) in btnList">
             <btn :text="name" class="btn--header font--medium" @btn-click="$emit('read-page', value._default)"/>
             <div v-if="Object.keys(value).length > 1" class="dropdown-content">
-              <btn v-for="(item, name) in value" :text="name" class="font--small btn--header btn-nav" @btn-click="$emit('read-page', item)"/>
+              <template v-for="(item, name) in value">
+                <btn v-if="name !== '_default'" :text="name" class="font--small btn--header btn-nav" @btn-click="$emit('read-page', item)"/>
+              </template>
             </div>
           </div>
         </div>

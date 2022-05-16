@@ -436,7 +436,7 @@ class TextRenderer {
     const lines = htmlContentString.trim().split("\n");
 
     let htmlContent = '';
-
+    let first = true;
     for (const line of lines) {
       let value = line.trim();
       if (value == "") {
@@ -490,10 +490,11 @@ class TextRenderer {
             continue;
           }
 
+          let loweredlinkname = linkName.toLowerCase();
           // // Search Indirectly
           for (const pageName in this.dir) {
             let dirItem = this.dir[pageName];
-            if (dirItem.title.toLowerCase() === linkNameLowered) {
+            if (dirItem.title.toLowerCase() === loweredlinkname) {
               value = value.replace(link, `<a class="btn btn-primary btn--color-secondary" onclick="root.readPage('${linkNameLowered}')">${dirItem.title}</a>`);
               break;
             }
@@ -504,7 +505,14 @@ class TextRenderer {
       }
 
       // Add Value
-      htmlContent += value + "<br>\n";
+      
+      if (first) {
+        htmlContent += value + "\n";
+        first = false;
+      } else {
+        htmlContent += value + "<br>\n";
+      }
+
     }
 
 
