@@ -2,31 +2,90 @@
 <script>
   window.pageData = {
     "title": "Home",
-    "parent": "adsds",
+    "urlName": "home",
+    "parent": "geh",
     "tags": "",
     "description": "Stuff stuff",
-    "createSpoilers": false,
-    "fileStructure": {
-      "nonspoiler": {
-        "nonspoiler-overview": "Default"
+    "createSpoilers": true,
+    "tabs": {
+      "nonspoiler-overview": {
+        "name": "Default",
+        "area": "nonspoiler"
       },
-      "spoiler": {}
+      "spoiler-overview": {
+        "name": "Default",
+        "area": "spoiler"
+      }
     },
-    "disabledProfileData": []
+    "disabledProfileData": [],
+    "urlPath": "content/home.html"
   }
 
-  window.profileData = {}
+  window.profileData = {
+    "nonspoiler-overview": {
+      "Title": "Ethan Morales",
+      "Image": {
+        "Original Art": "assets/images/Ethan-Morales.png",
+        "Uniform": "assets/images/Ethan Morales.png"
+      },
+      "Content": {
+        "Desc": {
+          "Full Name": "Ethan R. Morales",
+          "Alias": [
+            "Tantan",
+            "Lunatic",
+            "Crazy Sociopath"
+          ]
+        },
+        "Biography": {
+          "Race": "Human",
+          "Birthday": "15 June",
+          "Age": "15",
+          "Gender": "Male",
+          "Height": "168 cm",
+          "Weight": "58 kg",
+          "Hair Color": "Orange-Red",
+          "Skin Color": "Light-Beige",
+          "Blood Type": "AB"
+        },
+        "Power": {
+          "Rank": "Primera",
+          "Ability": [
+            "Candlefire",
+            "Creation"
+          ],
+          "Passive Ability": [
+            "Fire Resistance"
+          ]
+        },
+        "Status": {
+          "Status": "Alive",
+          "Birthplace": "Desteria, Shanty Town",
+          "Family": [
+            "Madelyn Morales (Mother)",
+            "Nathaniel Morales (Father)",
+            "Isaac Morales (Little Brother)"
+          ]
+        }
+      }
+    }
+  }
 </script>
 
 <!-- File Content -->
 
-<div id="spoiler"></div>
+<div id="spoiler">
+  <div id="spoiler-overview" class="page-tab">
+    Spoilers Spoilersadsadsadasds
+  </div>
+</div>
 <div id="nonspoiler">
   <div id="nonspoiler-overview" class="page-tab">
-    Welcome to the Song of Enderion Official Wiki!
-    <a href="?p=ethan-morales">click me</a>Welcome to the Song of Enderion Official Wiki!
-    <a href="?p=ethan-morales">click me</a>Welcome to the Song of Enderion Official Wiki!
-    <a href="?p=ethan-morales">click me</a>Welcome to the Song of Enderion Official Wiki!
-    <a href="?p=ethan-morales">click me</a>
+    The Home Page!
+
+    [[Ethan-morales]]
+    asdasdasd
+
+    [[nothing]]
   </div>
 </div>

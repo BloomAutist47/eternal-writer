@@ -1,92 +1,67 @@
-<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Eternal Writer</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Template</title>
 
-  <!-- CSS -->
-  <link href="./.eternal/css/style.css" rel="stylesheet">
+  <!-- Style -->
+  <link rel="stylesheet" href=".eternal/css/style.css">
 
-  <!-- JS -->
-  <script src="./.eternal/js/bootstrap.bundle.min.js" type="text/javascript"></script>
-  <script src="./.eternal/js/easymde.min.js" type="text/javascript"></script>
-  <script src="./.eternal/js/notifications.min.js" type="text/javascript"></script>
-  <script src="./.eternal/js/jsoneditor.js" type="text/javascript"></script>
-  <script src="./.eternal/js/main.js" type="text/javascript"></script>
+  <!-- Scripts -->
+  <script rel="modulepreload" src=".eternal/js/vue/vue.global.js"></script>
+  <script rel="modulepreload" src=".eternal/js/component.js"></script>
+  <script rel="modulepreload" src=".eternal/js/main.js"></script>
 
+  <!-- Editor Scripts -->
+  <script rel="modulepreload" src=".eternal/js/editor/codeflask.min.js"></script>
+  <script rel="modulepreload" src=".eternal/js/editor/jsoneditor.js"></script>
+  <script rel="modulepreload" src=".eternal/js/editor/easymde.min.js"></script>
 
+  <!-- <script src=".eternal/js/editor/codemirror.js"></script>
+  <script src=".eternal/js/editor/codemirror-javascript/javascript.js"></script> -->
 
-
-  <!-- Head Bar -->
-  <div id="head-card"></div>
-
+  
 </head>
 
-<!-- <div id="loading-screen">
-  <div class='loading-div'>
-    <div class='loading-block'>
-      <div class='loading-item'></div>
-      <div class='loading-item'></div>
-      <div class='loading-item'></div>
-      <div class='loading-item'></div>
-      <div class='loading-item'></div>
-      <div class='loading-item'></div>
-      <div class='loading-item'></div>
-      <div class='loading-item'></div>
+<body>
+
+
+  <div id="app" v-cloak>
+    <div class="d-flex flex-column center">
+
+      <!-- Page Header -->
+      <div id="header" class="row">
+        <header-card :title="projectTitle" :subtitle="projectSubtitle" :btn-list="headerNavBtn" />
+      </div>
+      
+      <!-- <div>
+        <btn @btn-click="readPage('home')" text="homes"/>
+      </div> -->
+
+      <!-- Editor -->
+      <div class="row editor-div">
+        <editor :passed-editor-data="editorData" @save-content="saveContent"/>
+      </div>
+
+
+      
+      
+      <!-- Page Card -->
+      <div class="row card card--visual mb-5" id="page-content">
+        <!-- Content -->
+          <h1 class="page-title d-flex justify-content-between" v-cloak>{{ pageTitle }}
+            <toggle v-show="pageData.createSpoilers === true" @toggled="areaToggleHandler" />
+          </h1>
+          <page-content :page-contents="pageContents" :page-data="pageData" :dir="dir" :area-toggle="areaToggle" @read-page="readPage">
+      </div>
+
     </div>
-  </div>
-</div> -->
-
-<div id="editor-area">
-  <div id="page-editor-sidebar" class="hide"></div>
-  <div id="page-editor-sidebar-btns"></div>
-  <div id="page-editor"> </div>
-</div>
-
-<body class="hide">
-  <div class="container body-card">
-    <div id="spoiler-button"></div>
-
-    <div id="page-title">
-      <h1></h1>
-      <div id="page-breadcrumbs" class="hide"></div>
-    </div>
-
-    <div id="page-content"><button onclick="goTo('Ethan-Morales')">Test go</button></div>
-
-    <div id="page-tags"></div>
   </div>
 
   <script>
-    // Add Site Head
-    getAsset('headbar.html')
-      .then(data => {
-        document.getElementById('head-card').innerHTML = data;
-
-        getAsset('eternal.json') // Website Title
-          .then(data => {
-            document.getElementById('project-title').innerText = data['projectTitle'];
-          })
-
-        // Add Horizontal Navigation Bar
-        getAsset('navbar.html')
-          .then(data => {
-            document.getElementById('nav-card').innerHTML = data;
-          })
-      })
-
-    // Gets Directory
-    getAsset('directory.json')
-      .then(async(data) => {
-        directory = data;
-      })
-      .then(() => {
-        // Gets Input Url
-        toggleScrollbarVisibility();
-        renderPage();
-      })
+    startPage()
   </script>
 
 </body>

@@ -1,146 +1,125 @@
-@mixin innerBorder($size, $color) {
-  -webkit-box-shadow: inset 0px 0px 0px $size $color !important;
-  -moz-box-shadow: inset 0px 0px 0px $size $color !important;
-  box-shadow: inset 0px 0px 0px $size $color !important;
+// Font Sizes
+.font--smaller {
+  font-size: smaller;
 }
 
 
-.hide {
-  display: none !important;
-}
-
-.space {
-  margin-bottom: 0.5em !important;
-}
-
-.bold {
-  font-weight: bold;
-}
-
-// Primary button used   
-.btn {
-  outline: 0px !important;
-  -webkit-appearance: none;
-  box-shadow: none !important;
-  cursor: pointer !important;
-}
-
-.btn-one {
-  font-size: 1rem;
-  background-color: $Color1;
-  color: $FontColor2;
-  border: 0em;
-  cursor: pointer !important;
-  &:hover {
-    background-color: $Color1Dark;
-    color: $FontColor2;
-    cursor: pointer !important;
-  }
-}
-
-.btn-active {
-  background-color: $Color1Dark;
-  color: $FontColor2;
-}
-
-.btn-two {
-  background-color: $BG;
-  color: $FontColor1;
-  &:hover {
-    background-color: $BG3;
-  }
-}
-
-.btn-small {
-  font-size: small !important;
-}
-
-.btn-w5 {
-  width: 7.5em !important;
-}
-
-.no-border {
-  border: none !important;
-}
-
-.no-select {
-  outline: 0px !important;
-  -webkit-box-shadow: none !important;
-  -moz-box-shadow:  none !important;
-  box-shadow:  none !important;
-
-  &:focus {
-    outline: 0px !important;
-    -webkit-box-shadow: none !important;
-    -moz-box-shadow:  none !important;
-    box-shadow:  none !important;
-  }
-}
-
-.w-100p {
-  width: 100%;
-}
-
-.small-font {
+.font--small {
   font-size: small;
 }
 
-.side-line {
-  position: relative;
-  display: inline-flex;
+.font--medium {
+  font-size: medium;
 }
 
-.block-color {
-  background-color: $Color1 !important;
-  color: $FontColor2 !important;
-  border-radius: 0.5em;
-  padding: 0.5em;
-  width: fit-content;
+.font--large {
+  font-size: large;
 }
 
-.border-radius-none-right {
-  border-bottom-right-radius: 0em !important;
-  border-top-right-radius: 0em !important;
+.font--larger {
+  font-size: larger;
 }
 
-.input-one {
-  padding-left: 1em;
-  // width: 100%;
-  // height: 100%;
-  border-radius: 0em;
-  height: inherit;
+.font--25 {
+  font-size: 2.5em;
+}
+
+// Font allignment
+.text-left {
+  text-align: left;
+}
+
+// Font Color
+.font--dark {
+  color: $font-color-dark;
+}
+
+.font--light {
+  color: $font-color-light;
+}
+
+// weight
+.font--w-bold {
   font-weight: 400;
-  border: none;
-  outline: none;
-  // display: table;
-  padding: 0.5em 1em;
-  border: 1px solid $BG;
+}
+
+// Width
+.width-100 {
+  width: 100%;
+}
+
+
+// Allignment
+.center {
+  display: grid;
+  place-items: center;
+}
+
+.float-start {
+  float: left !important;
+}
+
+.float-end {
+  float: right !important;
+}
+
+.float-none {
+  float: none !important;
+}
+
+
+
+// Appearance
+.hide {
+  display: none !important;
+  transition: display 0.5s ease !important;
+}
+
+.space {
+  padding-bottom: 1em !important;
+  margin: 0em;
+}
+
+.bg--primary {
+  background-color: $color-primary;
+  color: $color-light;
+}
+
+
+
+
+
+
+
+// Others
+
+.glass-container {
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2); 
+  border-radius: 5px;
+  position: relative;
+  z-index: 1;
+  background: inherit;
+  overflow: hidden;
+}
+
+.glass-container:before {
+  content: "";
+  position: absolute;
+  background: inherit;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: inset 0 0 2000px rgba(255, 255, 255, 1);
+  filter: blur(10px);
+  margin: -20px;
+}
+
+
+.outline-primary {
   &:focus {
-    @include innerBorder(1px, $Color1);
+    outline: 2px solid $color-primary;
   }
 }
-
-
-.mr-1 {
-  margin-right: 0.3em !important;
-}
-
-.ml-1 {
-  margin-left: 0.3em !important;
-}
-
-.mb-1 {
-  margin: 0em 0.3em !important;
-}
-
-.link {
-  color: $FontColor1;
-  background-color: $FontColor2;
-  text-decoration: none;
-  padding: 0.2em;
-  border-radius: 0.2em;
-  &:hover {
-    background-color: $Color1;
-    color: $FontColor2;
-  }
-}
+  

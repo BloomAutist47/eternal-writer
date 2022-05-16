@@ -1,0 +1,47 @@
+@mixin font {
+  font-family: $font-family;
+  color: $font-color-dark;
+  font-size: small ;
+} 
+
+.CodeMirror-lines   {
+  @include font();
+}
+
+#editor {
+  display: grid;
+  place-items: center;
+  @include font();
+}
+
+.editor-table {
+  tbody {
+    width: 100%;
+    tr {
+      width: 100%;
+      td {
+        font-size: small;
+        input {
+          font-size: small;
+          width: 100%;
+        }
+        label {
+          width: 6em;
+        }
+      }
+      .textinput-input {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.textinput-label {
+  width: max-content;
+}
+
+.EasyMDEContainer {
+  height: fit-content;
+  font-size: medium;
+}
+

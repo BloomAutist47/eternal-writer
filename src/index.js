@@ -4,6 +4,9 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const os = require('os-utils');
 const fs = require('fs-extra');
+const pretty = require('@financial-times/pretty');  
+
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -70,14 +73,13 @@ ipcMain.on("toMain", async(event, value) => {
 
       let rawdata = fs.readFileSync(filePath + "\\.eternal\\eternal.json");
       let json = JSON.parse(rawdata);
-      json.id = makeid(30);
+      json.id = makeid(50);
       json.projectTitle = value.data.name;
       fs.writeFileSync(filePath + "\\.eternal\\eternal.json", JSON.stringify(json, null, 2));
 
-      let rawHtml = fs.readFileSync(filePath + "\\.eternal\\js\\main.js", 'utf8');
-
-      fs.writeFileSync(filePath + "\\.eternal\\js\\main.js", rawHtml.toString().replace("'[[id]]'", `'${json.id}'`));
-      console.log(json);
+      // let rawHtml = fs.readFileSync(filePath + "\\.eternal\\js\\main.js", 'utf8');
+      
+      // fs.writeFileSync(filePath + "\\.eternal\\js\\main.js", rawHtml.toString().replace("'[[id]]'", `'${json.id}'`));
     });
     return;
   }
@@ -89,22 +91,38 @@ ipcMain.on("toMain", async(event, value) => {
     fileData += "\n\nwindow.profileData = " + JSON.stringify(value.data.profileData, null, 2) + `\n</script>`;
 
 
-    let fileContent = value.data.content;
+    const saveData = pretty(`<!-- File Data -->\n${fileData}\n\n<!-- File Content -->\n\n${value.data.content}`);
+    const path = value.data.path + "\\";
+    const pageUrlPath = value.data.pageUrl.replace(/\//g, "\\");
 
-    let saveData = `<!-- File Data -->\n${fileData}\n\n${fileContent}`;
-    let path = value.data.path + "\\" + value.data.pageUrl.replace(/\//g, "\\");
-    console.log(value.data);
-    console.log(path);
-    fs.writeFileSync(path, saveData);
-    // console.log(data);
+    if (!fs.existsSync(path)){
+      fs.mkdirSync(path, { recursive: true });
+    }
+
+    fs.writeFileSync(path + pageUrlPath, saveData);
+
+    // Save to Dir
+    if (value.data.isNewPage) {
+      const  dir = fs.readFileSync(path + "\\.eternal\\directory.json");
+      let dirJson = JSON.parse(dir);
+      dirJson[value.data.pageData.urlName] = {
+        "title": value.data.pageData.title,
+        "path": value.data.pageUrl,
+        "parent": value.data.pageData.parent,
+      };
+      fs.writeFileSync(path + "\\.eternal\\directory.json", JSON.stringify(dirJson, null, 2));  
+    }
+
+    console.log();
+
     return;
   }
 
 
-  // Open Project
-  if (value.name == 'project:getID') {
-    mainWindow.webContents.send('fromMain', {name: 'path', value: projectPaths[value.data]});
-  }
+  // // Open Project
+  // if (value.name == 'project:getID') {
+  //   mainWindow.webContents.send('fromMain', {name: 'path', value: projectPaths[value.data]});
+  // }
 
   // Open Project
   if (value.name == 'project:open') {
@@ -120,11 +138,11 @@ ipcMain.on("toMain", async(event, value) => {
 
 
       mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        autoHideMenuBar: true,
-        frame: false,
-        resizable: false,
+        width: 1200,///800,
+        height: 800,
+        // autoHideMenuBar: true,
+        // frame: false,
+        // resizable: false,
         webPreferences: {
           nodeIntegration: false,
           contextIsolation: true,
@@ -138,6 +156,11 @@ ipcMain.on("toMain", async(event, value) => {
       mainWindow.webContents.openDevTools();
 
       projectPaths[json.id] = filePaths[0];
+      mainWindow.webContents.once('dom-ready', () => {
+        mainWindow.webContents.send('fromMain', {name: 'path', value: filePaths[0]});
+      });
+
+      
     }
     return;
   }
