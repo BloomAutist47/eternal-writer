@@ -76,10 +76,6 @@ ipcMain.on("toMain", async(event, value) => {
       json.id = makeid(50);
       json.projectTitle = value.data.name;
       fs.writeFileSync(filePath + "\\.eternal\\eternal.json", JSON.stringify(json, null, 2));
-
-      // let rawHtml = fs.readFileSync(filePath + "\\.eternal\\js\\main.js", 'utf8');
-      
-      // fs.writeFileSync(filePath + "\\.eternal\\js\\main.js", rawHtml.toString().replace("'[[id]]'", `'${json.id}'`));
     });
     return;
   }
@@ -95,10 +91,7 @@ ipcMain.on("toMain", async(event, value) => {
     const path = value.data.path + "\\";
     const pageUrlPath = value.data.pageUrl.replace(/\//g, "\\");
 
-    if (!fs.existsSync(path)){
-      fs.mkdirSync(path, { recursive: true });
-    }
-
+    fs.ensureFileSync(path + pageUrlPath);
     fs.writeFileSync(path + pageUrlPath, saveData);
 
     // Save to Dir
@@ -113,6 +106,7 @@ ipcMain.on("toMain", async(event, value) => {
       fs.writeFileSync(path + "\\.eternal\\directory.json", JSON.stringify(dirJson, null, 2));  
     }
 
+    mainWindow.webContents.send('fromMain', {name: 'done-saving', value: null});
     console.log();
 
     return;
@@ -153,12 +147,17 @@ ipcMain.on("toMain", async(event, value) => {
       });
       mainWindow.loadFile(filePaths[0] + "\\" + json.main);
       mainWindow.show();
-      mainWindow.webContents.openDevTools();
+      // mainWindow.webContents.openDevTools();
 
       projectPaths[json.id] = filePaths[0];
       mainWindow.webContents.once('dom-ready', () => {
         mainWindow.webContents.send('fromMain', {name: 'path', value: filePaths[0]});
       });
+      mainWindow.webContents.once('did-finish-load', () => {
+        mainWindow.webContents.send('fromMain', {name: 'path', value: filePaths[0]});
+      });
+
+      
 
       
     }

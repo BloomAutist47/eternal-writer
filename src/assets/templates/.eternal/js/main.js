@@ -13,12 +13,18 @@ const isObject = (obj) => {
 
 
 try {
-  window.api.receive("fromMain", (data) => {
+  window.api.receive("fromMain", async (data) => {
     if (data.name == 'path') {
       if (projectPath != '') return;
       projectPath = data.value;
       console.log("Path: ", projectPath);
     }
+
+    if (data.name == 'done-saving') {
+      console.log('Rerendering');
+      await root.rerenderPage();
+    }
+
   });
 } catch (error) {}
 
@@ -49,6 +55,8 @@ function startPage() {
         editorData: {},
 
         isEmptyPage: false,
+
+        rerenderData: {},
       };
     },
     methods: {
@@ -126,7 +134,7 @@ function startPage() {
               pageData: this.cloneObj(data.pageData),
               profileData: this.cloneObj(data.profileData),
               pageName: data.pageData.name,
-              pageUrl: pageUrlPath,
+              pageUrl: data.pageData.urlPath,
               path: projectPath,
               isNewPage: this.isEmptyPage,
             }
@@ -134,13 +142,20 @@ function startPage() {
 
           this.dir[data.pageData.urlName] = {
             "title": data.pageData.title,
-            "path": pageUrlPath,
+            "path": data.pageData.urlPath,
             "parent": data.pageData.parent,
           };
         }
         this.clearVars();
         // Rerender
-        await this.renderPage('rerender', data);
+        await this.$nextTick();
+
+
+        this.rerenderData = data;
+      },
+      async rerenderPage() {
+        this.clearVars();
+        await this.renderPage('rerender', this.rerenderData);
       },
       async renderPage(mode, data) {
         // Step 3. Set Page General Data
@@ -489,7 +504,7 @@ class TextRenderer {
       }
 
       // Add Value
-      htmlContent += value;
+      htmlContent += value + "<br>\n";
     }
 
 
