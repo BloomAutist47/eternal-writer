@@ -78,7 +78,7 @@ function startPage() {
       isElectron() {
         const userAgent = navigator.userAgent.toLowerCase();
         // renderEditor(true);
-        
+
         if (userAgent.indexOf(' electron/') == -1) {
           // Not electron
           console.log("Not on electron");
@@ -187,7 +187,7 @@ function startPage() {
             pageUrlPath = 'content/' + pageName + '.html';
             window.pageData.title = this.capitalize(pageName.replace(/\-/g, " ")).trim();
             this.isEmptyPage = true;
-            break; 
+            break;
 
           case 'rerender':
             window.profileData = data.profileData;
@@ -199,7 +199,7 @@ function startPage() {
             break;
         }
         let pathSplit = window.pageData.urlPath.split("/");
-        window.pageData.urlName = pathSplit[pathSplit.length-1].split(".html")[0];
+        window.pageData.urlName = pathSplit[pathSplit.length - 1].split(".html")[0];
 
         // Step 6. Set Page Specific Data
         this.pageData = window.pageData;
@@ -273,7 +273,7 @@ function startPage() {
 
       // Step 2. Gets Page URL
       pageName = this.getPageUrl();
-  
+
       await this.readPage(pageName);
 
 
@@ -479,7 +479,7 @@ class TextRenderer {
             }
           }
           value = value.replace(link, `<a class="btn btn-primary btn--color-secondary red" onclick="root.readPage('${linkNameLowered}')">${link.replace(/\]/g, '').replace(/\[/g, '').trim()}</a>`);
-          
+
         }
       }
 

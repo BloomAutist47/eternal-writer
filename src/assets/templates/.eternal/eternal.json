@@ -7,25 +7,25 @@
     "headerNavigation": {
         "Home": {"_default": "home"},
         "Story": {
-            "_default": "stories/_index",
-            "Story A": "stories/story-a",
-            "Story B": "stories/story-b",
-            "Story C": "stories/story-c"
+            "_default": "story",
+            "Story A": "story-a",
+            "Story B": "story-b",
+            "Story C": "story-c"
         },
         "Characters": {
-            "_default": "characters/_index",
-            "Story A": "characters/story-a",
-            "Story B": "characters/story-b",
-            "Story C": "characters/story-c"
+            "_default": "characters",
+            "Story A": "story-a",
+            "Story B": "story-b",
+            "Story C": "story-c"
         },
         "Lore": {
-            "_default": "lore/_index",
-            "World": "lore/world",
-            "History": "lore/history",
-            "Monsters": "lore/monsters",
-            "Races": "lore/races",
-            "Magic": "lore/magic",
-            "Creatures": "lore/creatures"
+            "_default": "lore",
+            "World": "world",
+            "History": "history",
+            "Monsters": "monsters",
+            "Races": "races",
+            "Magic": "magic",
+            "Creatures": "creatures"
         },
         "Librarium": {"_default": "librarium"},
         "About": {"_default": "about"}
