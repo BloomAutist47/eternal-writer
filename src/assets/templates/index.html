@@ -10,7 +10,7 @@
   <link rel="stylesheet" href=".eternal/css/style.css">
 
   <!-- Scripts -->
-  <script rel="modulepreload" src=".eternal/js/vue/vue.global.js"></script>
+  <script rel="modulepreload" src=".eternal/js/vue/vue.global.prod.js"></script>
   <script rel="modulepreload" src=".eternal/js/component.js"></script>
   <script rel="modulepreload" src=".eternal/js/main.js"></script>
 
@@ -31,7 +31,7 @@
       </div>
 
       <!-- Editor -->
-      <div class="row editor-div">
+      <div class="row editor-div" v-if="isElectronCheck">
         <editor :passed-editor-data="editorData" @save-content="saveContent" />
       </div>
 

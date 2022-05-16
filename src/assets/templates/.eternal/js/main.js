@@ -263,6 +263,11 @@ function startPage() {
       }
 
     },
+    computed: {
+      isElectronCheck() {
+        return this.isElectron();
+      }
+    },
     async mounted() {
       // Step 1. Retrieves Necessary Files
       const metaRes = await fetch(`.eternal/eternal.json`); // Get Metadata
