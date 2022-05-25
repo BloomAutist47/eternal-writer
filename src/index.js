@@ -80,8 +80,8 @@ ipcMain.on("toMain", async(event, value) => {
     return;
   }
 
-  // Render Them?
-  if (value.name == 'project:render') {
+  // Save Project
+  if (value.name == 'project:save') {
 
     let fileData = "<script>\nwindow.pageData = " + JSON.stringify(value.data.pageData, null, 2);
     fileData += "\n\nwindow.profileData = " + JSON.stringify(value.data.profileData, null, 2) + `\n</script>`;
@@ -112,12 +112,6 @@ ipcMain.on("toMain", async(event, value) => {
     return;
   }
 
-
-  // // Open Project
-  // if (value.name == 'project:getID') {
-  //   mainWindow.webContents.send('fromMain', {name: 'path', value: projectPaths[value.data]});
-  // }
-
   // Open Project
   if (value.name == 'project:open') {
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
@@ -129,7 +123,6 @@ ipcMain.on("toMain", async(event, value) => {
 
       let rawdata = fs.readFileSync(filePaths[0] + "\\.eternal\\eternal.json");
       let json = JSON.parse(rawdata);
-
 
       mainWindow = new BrowserWindow({
         width: 1200,///800,
@@ -156,11 +149,36 @@ ipcMain.on("toMain", async(event, value) => {
       mainWindow.webContents.once('did-finish-load', () => {
         mainWindow.webContents.send('fromMain', {name: 'path', value: filePaths[0]});
       });
-
-      
-
-      
     }
+    return;
+  }
+
+  if (value.name == 'project:update') {
+
+    const filePath = value.path;
+    let target_path = path.join(__dirname) + '\\assets\\templates\\.eternal\\css';
+    let file = `${filePath}\\.eternal\\`;
+    console.log(target_path, file);
+    fs.copy(path.join(__dirname) + '\\assets\\templates\\.eternal\\css', `${filePath}\\.eternal\\css\\`);
+    fs.copy(path.join(__dirname) + '\\assets\\templates\\.eternal\\js', `${filePath}\\.eternal\\js\\`);
+    fs.copyFile(path.join(__dirname) + '\\assets\\templates\\index.html', `${filePath}\\index.html`);
+    return;
+  }
+
+  if (value.name == 'project:deletepage') {
+    console.log(value.data);
+    const dir = fs.readFileSync(value.data.projectPath  + "\\.eternal\\directory.json");
+    let dirJson = JSON.parse(dir);
+
+    // Move file to trash bin
+    const pagePath = dirJson[value.data.pageName].path;
+    console.log(value.data.projectPath + '\\' + pagePath.replace(/\//g, '\\'), value.data.projectPath + `\\trash\\${value.data.pageName}.html`);
+    fs.move(value.data.projectPath + '\\' + pagePath.replace(/\//g, '\\'), value.data.projectPath + `\\trash\\${value.data.pageName}.html`);
+
+    // Delete file from directory
+    delete dirJson[value.data.pageName];
+    fs.writeFileSync(value.data.projectPath + "\\.eternal\\directory.json", JSON.stringify(dirJson, null, 2));  
+
     return;
   }
 
@@ -190,16 +208,3 @@ function makeid(length) {
     return result;
   }
 }
-
-
-
-      // createWindow = new BrowserWindow({
-      //   parent: mainWindow,
-      //   webPreferences: {
-      //     nodeIntegration: false,
-      //     contextIsolation: true,
-      //     enableRemoteModule: true,
-      //     worldSafeExecuteJavaScript: true,
-      //     preload: path.join(__dirname, "js/preload.js")
-      //   }
-      // });
