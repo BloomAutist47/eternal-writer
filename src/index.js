@@ -182,6 +182,22 @@ ipcMain.on("toMain", async(event, value) => {
     return;
   }
 
+  if (value.name == 'project:getcontentdirs') {
+    const results = getDirectoriesRecursive(value.projectPath + '\\content\\');
+    let paths = [];
+    for (const result of results) {
+      let rawPath = result.split('content\\')[1].trim();
+      if (rawPath == '') {
+        paths.push('content\\page-name.html');
+        continue;
+      }
+      paths.push('content\\' + rawPath + '\\page-name.html');
+    }
+
+    mainWindow.webContents.send('fromMain', {name: 'urlpaths', value: paths});
+    return;
+  }
+
 });
 
 ipcMain.on("toProcess", async(event, value) => {
@@ -207,4 +223,18 @@ function makeid(length) {
     }
     return result;
   }
+}
+
+function flatten(lists) {
+  return lists.reduce((a, b) => a.concat(b), []);
+}
+
+function getDirectories(srcpath) {
+  return fs.readdirSync(srcpath)
+    .map(file => path.join(srcpath, file))
+    .filter(path => fs.statSync(path).isDirectory());
+}
+
+function getDirectoriesRecursive(srcpath) {
+  return [srcpath, ...flatten(getDirectories(srcpath).map(getDirectoriesRecursive))];
 }
