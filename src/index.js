@@ -193,9 +193,9 @@ ipcMain.on("toMain", async(event, value) => {
     const id = value.id;
     const filePath = value.projectPath;
    
-    fs.copy(path.join(__dirname) + '\\assets\\templates\\.eternal\\css', `${filePath}\\.eternal\\css\\`);
-    fs.copy(path.join(__dirname) + '\\assets\\templates\\.eternal\\js', `${filePath}\\.eternal\\js\\`);
-    fs.copyFile(path.join(__dirname) + '\\assets\\templates\\index.html', `${filePath}\\index.html`);
+    await fs.copy(path.join(__dirname) + '\\assets\\templates\\.eternal\\css', `${filePath}\\.eternal\\css\\`);
+    await fs.copy(path.join(__dirname) + '\\assets\\templates\\.eternal\\js', `${filePath}\\.eternal\\js\\`);
+    await fs.copyFile(path.join(__dirname) + '\\assets\\templates\\index.html', `${filePath}\\index.html`);
     projectPaths[id].mainWindow.reload();
     return;
   }
