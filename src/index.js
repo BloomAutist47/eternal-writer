@@ -85,31 +85,56 @@ ipcMain.on("toMain", async(event, value) => {
   // Save Project
   if (value.name == 'project:save') {
 
-    let fileData = "<script>\nwindow.pageData = " + JSON.stringify(value.data.pageData, null, 2);
-    fileData += "\n\nwindow.profileData = " + JSON.stringify(value.data.profileData, null, 2) + `\n</script>`;
+    // Parse pageData
+    let fileData = "<script>\nwindow.pageData = " + JSON.stringify(value.pageData, null, 2);
+    fileData += "\n\nwindow.profileData = " + JSON.stringify(value.profileData, null, 2) + `\n</script>`;
 
+    // Parse ContentData
+    const saveData = pretty(`<!-- File Data -->\n${fileData}\n\n<!-- File Content -->\n\n${value.contentData}`);
 
-    const saveData = pretty(`<!-- File Data -->\n${fileData}\n\n<!-- File Content -->\n\n${value.data.content}`);
-    const path = value.data.path + "\\";
-    const pageUrlPath = value.data.pageUrl.replace(/\//g, "\\");
-
-    fs.ensureFileSync(path + pageUrlPath);
-    fs.writeFileSync(path + pageUrlPath, saveData);
+    // Get Infos
+    // Absolute Path of Project Folder
+    const projectPath = value.projectPath + "\\";
+    // Absolute Path of Current Page
+    const pagePath = projectPath + value.info.pagePath.replace(/\//g, "\\");
+    // raw URL name of file
+    const urlName = value.pageData.urlName;
 
     // Save to Dir
-    if (value.data.isNewPage) {
-      const  dir = fs.readFileSync(path + "\\.eternal\\directory.json");
-      let dirJson = JSON.parse(dir);
-      dirJson[value.data.pageData.urlName] = {
-        "title": value.data.pageData.title,
-        "path": value.data.pageUrl,
-        "parent": value.data.pageData.parent,
-      };
-      fs.writeFileSync(path + "\\.eternal\\directory.json", JSON.stringify(dirJson, null, 2));  
+    const dir = fs.readFileSync(projectPath + ".eternal\\directory.json");
+    let dirJson = JSON.parse(dir);
+
+    if (dirJson.hasOwnProperty(urlName)) {
+      const origPath = projectPath + dirJson[urlName].path.replace(/\//g, '\\');
+
+      // Move Page if new path
+      if (fs.existsSync(origPath)) {
+        if (dirJson.hasOwnProperty(urlName) && origPath != pagePath) {
+          fs.ensureDirSync(pagePath.replace(`${urlName}.html`, ''));
+          await fs.move(origPath, pagePath);
+        }
+      } else {
+        fs.ensureFileSync(pagePath);
+      }
+    } else {
+      dirJson[urlName] = {};
+      fs.ensureFileSync(pagePath);
     }
 
-    const id = value.id;
-    projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'done-saving', value: null});
+    // Save Directory
+    dirJson[urlName] = {
+      "title": value.pageData.title,
+      "path": value.info.pagePath,
+      "parent": value.pageData.parent,
+    };
+
+    fs.writeFileSync(projectPath + ".eternal\\directory.json", JSON.stringify(dirJson, null, 2));  
+    
+    // Save Page
+    fs.writeFileSync(pagePath, saveData);
+
+    // Send signal that saving is done
+    projectPaths[value.id].mainWindow.webContents.send('fromMain', {name: 'done-saving', value: null});
 
     console.log("saved!");
     return;

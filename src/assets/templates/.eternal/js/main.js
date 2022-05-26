@@ -2,7 +2,7 @@
 
 var areas = ['spoiler', 'nonspoiler'];
 var pageName = '';
-var pageUrlPath = '';
+
 var idList = [];
 var root;
 var projectPath = '';
@@ -37,7 +37,6 @@ try {
 
   });
 } catch (error) {
-  console.log(error);
 
 }
 
@@ -149,6 +148,7 @@ function startPage() {
         });
 
         this.readPage('home');
+        document.getElementById('sidebar').classList.add('hide');
 
       },
       async newPage() {
@@ -156,6 +156,7 @@ function startPage() {
         window.history.replaceState(null, null, `?p=new-page`);
         this.clearVars();
         await this.renderPage('pageNull', 'assets/new-page.html');
+        document.getElementById('sidebar').classList.add('hide');
       },
       async readPage(pagename_, newPage = false) {
         pageName = pagename_.replace(/\s/g, '-').trim();
@@ -178,24 +179,29 @@ function startPage() {
       async saveContent(data) {
         let isElectron = this.isElectron();
         if (isElectron) {
+          // Creates URLpath with urlName.html at the end /
+          let pagePath = data.pageData.urlPath.slice().trim();
+          if (pagePath.charAt(pagePath.length - 1) != '/') {
+            pagePath += '/';
+          }
+          pagePath += data.pageData.urlName.replace(/\s/g, '-') + '.html';
 
           window.api.send('toMain', {
             name: 'project:save',
             id: this.meta.id,
-            data: {
-              content: data.contentData,
-              pageData: this.cloneObj(data.pageData),
-              profileData: this.cloneObj(data.profileData),
-              pageName: data.pageData.name,
-              pageUrl: data.pageData.urlPath,
-              path: projectPath,
+            projectPath: projectPath,
+            info: {
+              pagePath: pagePath,
               isNewPage: this.isEmptyPage,
-            }
+            },
+            contentData: data.contentData,
+            pageData: this.cloneObj(data.pageData),
+            profileData: this.cloneObj(data.profileData),
           });
 
           this.dir[data.pageData.urlName] = {
             "title": data.pageData.title,
-            "path": data.pageData.urlPath,
+            "path": pagePath,
             "parent": data.pageData.parent,
           };
         }
@@ -238,9 +244,6 @@ function startPage() {
 
             // Step 5. Processing Window Variables
             loadScripts(pageRaw[0]);
-            window.pageData.urlPath = this.dir[window.pageData.urlName].path;
-            pageUrlPath = this.dir[window.pageData.urlName].path;
-
             this.isEmptyPage = false;
             break;
 
@@ -251,23 +254,21 @@ function startPage() {
 
             // Step 5. Processing Window Variables
             loadScripts(pageRaw[0]);
-            window.pageData.urlPath = 'content/' + pageName + '.html';
-            pageUrlPath = 'content/' + pageName + '.html';
             window.pageData.title = this.capitalize(pageName.replace(/\-/g, " ")).trim();
+            window.pageData.urlName = pageName.trim().toLowerCase().replace(/\s/g, '-');
+
+            if (data === 'assets/new-page.html') window.pageData.urlName += '-' + makeid(5);
+
             this.isEmptyPage = true;
             break;
 
           case 'rerender':
             window.profileData = data.profileData;
             window.pageData = data.pageData;
-            window.pageData.urlPath = this.dir[window.pageData.urlName].path;
-            pageUrlPath = this.dir[window.pageData.urlName].path;
 
             this.isEmptyPage = false;
             break;
         }
-        let pathSplit = window.pageData.urlPath.split("/");
-        window.pageData.urlName = pathSplit[pathSplit.length - 1].split(".html")[0];
 
         // Step 6. Set Page Specific Data
         this.pageData = window.pageData;
@@ -621,7 +622,7 @@ class TextRenderer {
         } else {
           name = link.replace(/\]/g, '').replace(/\[/g, '').trim();
         }
-        value = value.replace(link, `<a class="btn btn-secondary btn--link red" onclick="root.readPage('${linkNameLowered}')">${linkDisplayName}</a>`);
+        value = value.replace(link, `<a class="btn btn-secondary btn--link red" onclick="root.readPage('${linkNameLowered}')">${name}</a>`);
 
       }
       return value;

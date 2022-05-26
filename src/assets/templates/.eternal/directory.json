@@ -1,13 +1,13 @@
 {
   "page-not-found": {
-    "title": "Page not Found",
-    "path": "assets/page-not-found.html",
+    "title": "Story a",
+    "path": "content/story3/test/page-not-found.html",
     "parent": ""
   },
   "home": {
     "title": "Home",
     "path": "content/home.html",
-    "parent": ""
+    "parent": "geh"
   },
   "ethan-morales": {
     "title": "Ethan Morales",
@@ -32,6 +32,11 @@
   "nothing": {
     "title": "Nothing",
     "path": "content/nothing.html",
+    "parent": ""
+  },
+  "new-page-AJbec": {
+    "title": "New page",
+    "path": "content/test/new-page-AJbec.html",
     "parent": ""
   }
 }
