@@ -6,6 +6,8 @@ const os = require('os-utils');
 const fs = require('fs-extra');
 const pretty = require('@financial-times/pretty');  
 
+app.disableHardwareAcceleration();
+
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -106,9 +108,10 @@ ipcMain.on("toMain", async(event, value) => {
       fs.writeFileSync(path + "\\.eternal\\directory.json", JSON.stringify(dirJson, null, 2));  
     }
 
-    mainWindow.webContents.send('fromMain', {name: 'done-saving', value: null});
-    console.log();
+    const id = value.id;
+    projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'done-saving', value: null});
 
+    console.log("saved!");
     return;
   }
 
@@ -119,60 +122,66 @@ ipcMain.on("toMain", async(event, value) => {
     });
     if (canceled) {
       return;
-    } else {
-
-      let rawdata = fs.readFileSync(filePaths[0] + "\\.eternal\\eternal.json");
-      let json = JSON.parse(rawdata);
-
-      mainWindow = new BrowserWindow({
-        width: 1200,///800,
-        height: 800,
-        // autoHideMenuBar: true,
-        // frame: false,
-        // resizable: false,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-          enableRemoteModule: true,
-          worldSafeExecuteJavaScript: true,
-          preload: path.join(__dirname, "js/preload.js")
-        }
-      });
-      mainWindow.loadFile(filePaths[0] + "\\" + json.main);
-      mainWindow.show();
-      // mainWindow.webContents.openDevTools();
-
-      projectPaths[json.id] = filePaths[0];
-      mainWindow.webContents.once('dom-ready', () => {
-        mainWindow.webContents.send('fromMain', {name: 'path', value: filePaths[0]});
-      });
-      mainWindow.webContents.once('did-finish-load', () => {
-        mainWindow.webContents.send('fromMain', {name: 'path', value: filePaths[0]});
-      });
+    } 
+    
+    let rawdata = fs.readFileSync(filePaths[0] + "\\.eternal\\eternal.json");
+    let json = JSON.parse(rawdata);
+    
+    if (projectPaths.hasOwnProperty(json.id)) {
+      projectPaths[json.id].mainWindow.show();
+      return;
     }
+
+    projectPaths[json.id] = { path: filePaths[0]};
+
+    // Create Window
+    const win = new BrowserWindow({
+      width: 1200,///800,
+      height: 800,
+      // autoHideMenuBar: true,
+      // frame: false,
+      // resizable: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        enableRemoteModule: true,
+        worldSafeExecuteJavaScript: true,
+        preload: path.join(__dirname, "js/preload.js")
+      }
+    });
+
+    win.on('close', function() { //   <---- Catch close event
+      delete projectPaths[json.id];
+    });
+
+    win.loadFile(filePaths[0] + "\\" + json.main);
+    win.show();
+    win.webContents.openDevTools();
+
+    projectPaths[json.id].mainWindow = win;
+  
     return;
   }
 
   if (value.name == 'project:update') {
 
-    const filePath = value.path;
-    let target_path = path.join(__dirname) + '\\assets\\templates\\.eternal\\css';
-    let file = `${filePath}\\.eternal\\`;
-    console.log(target_path, file);
+    const id = value.id;
+    const filePath = value.projectPath;
+   
     fs.copy(path.join(__dirname) + '\\assets\\templates\\.eternal\\css', `${filePath}\\.eternal\\css\\`);
     fs.copy(path.join(__dirname) + '\\assets\\templates\\.eternal\\js', `${filePath}\\.eternal\\js\\`);
     fs.copyFile(path.join(__dirname) + '\\assets\\templates\\index.html', `${filePath}\\index.html`);
+    projectPaths[id].mainWindow.reload();
     return;
   }
 
   if (value.name == 'project:deletepage') {
-    console.log(value.data);
+
     const dir = fs.readFileSync(value.data.projectPath  + "\\.eternal\\directory.json");
     let dirJson = JSON.parse(dir);
 
     // Move file to trash bin
     const pagePath = dirJson[value.data.pageName].path;
-    console.log(value.data.projectPath + '\\' + pagePath.replace(/\//g, '\\'), value.data.projectPath + `\\trash\\${value.data.pageName}.html`);
     fs.move(value.data.projectPath + '\\' + pagePath.replace(/\//g, '\\'), value.data.projectPath + `\\trash\\${value.data.pageName}.html`);
 
     // Delete file from directory
@@ -183,6 +192,7 @@ ipcMain.on("toMain", async(event, value) => {
   }
 
   if (value.name == 'project:getcontentdirs') {
+    const id = value.id;
     const results = getDirectoriesRecursive(value.projectPath + '\\content\\');
     let paths = [];
     for (const result of results) {
@@ -194,7 +204,13 @@ ipcMain.on("toMain", async(event, value) => {
       paths.push('content\\' + rawPath + '\\page-name.html');
     }
 
-    mainWindow.webContents.send('fromMain', {name: 'urlpaths', value: paths});
+    projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'urlpaths', value: paths});
+    return;
+  }
+
+  if (value.name == 'project:getpath') {
+    const id = value.id;
+    projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'projectpath', value: projectPaths[value.id].path});
     return;
   }
 
@@ -207,8 +223,11 @@ ipcMain.on("toProcess", async(event, value) => {
   }
 
   if (value == 'screen:exit') {
-    app.quit();
-    return;
+    if (Object.keys(projectPaths).length === 0) {
+      app.quit();
+      return;
+    }
+    mainWindow.close();
   }
 });
 
