@@ -5,6 +5,7 @@ var pageName = '';
 
 var idList = [];
 var root;
+var projectId = '';
 var projectPath = '';
 var urlpaths = [];
 
@@ -15,30 +16,37 @@ const isObject = (obj) => {
 };
 
 
-try {
-  window.api.receive("fromMain", async(data) => {
-    if (data.name == 'projectpath') {
-      if (projectPath != '') return;
-      projectPath = data.value;
-      console.log("Path: ", projectPath);
-      return;
-    }
+// try {
+//   window.api.receive("fromMain", async(data) => {
+//     if (data.name == 'projectpath') {
+//       if (projectPath != '') return;
+//       projectPath = data.value;
+//       console.log("Path: ", projectPath);
 
-    if (data.name == 'done-saving') {
-      console.log('Rerendering');
-      await root.rerenderPage();
-      return;
-    }
+//       window.api.send('toMain', {
+//         name: 'project:getcontentdirs',
+//         id: projectId,
+//         projectPath: projectPath,
+//       });
 
-    if (data.name == 'urlpaths') {
-      urlpaths = data.value;
-      return;
-    }
+//       return;
+//     }
 
-  });
-} catch (error) {
+//     if (data.name == 'done-saving') {
+//       console.log('Rerendering');
+//       await root.rerenderPage();
+//       return;
+//     }
 
-}
+//     if (data.name == 'urlpaths') {
+//       urlpaths = data.value;
+//       return;
+//     }
+
+//   });
+// } catch (error) {
+
+// }
 
 
 function startPage() {
@@ -70,6 +78,9 @@ function startPage() {
 
         rerenderData: {},
         pageHistory: [],
+
+        urlpaths: [],
+        parentlists: [],
       };
     },
     methods: {
@@ -126,23 +137,23 @@ function startPage() {
         // alert('Updated Project to latest js/css/index!');
       },
       async gotoPage(pagename_) {
-        pageName = pagename_.replace(/\s/g, '-').trim();
-        if (pageName !== 'home') {
-          window.history.replaceState(null, null, `?p=${pageName}`);
-        } else {
-          window.history.replaceState(null, null, window.location.pathname);
-        }
+        // pageName = pagename_.replace(/\s/g, '-').trim();
+        // if (pageName !== 'home') {
+        //   window.history.replaceState(null, null, `?p=${pageName}`);
+        // } else {
+        //   window.history.replaceState(null, null, window.location.pathname);
+        // }
 
-        console.log(window.location.href.split('?p=')[0] + '?p=' + pageName);
+        // console.log(window.location.href.split('?p=')[0] + '?p=' + pageName);
         
-        if (!this.isElectron()) {
-          const newLink = window.location.href.split('?p=')[0] + '?p=' + pageName;
-          // window.location.replace();
-          window.open(newLink, "_self");
-        } else {
-          await this.readPage(pageName);
-        }
-        // await this.readPage(pageName);
+        // if (!this.isElectron()) {
+        //   const newLink = window.location.href.split('?p=')[0] + '?p=' + pageName;
+        //   // window.location.replace();
+        //   window.open(newLink, "_self");
+        // } else {
+        //   await this.readPage(pageName);
+        // }
+        await this.readPage(pagename_);
       },
       async historyPrevious() {
         if (this.pageHistory.length === 1) return;
@@ -363,7 +374,39 @@ function startPage() {
       }
     },
     async created() {
+
+      try {
+        window.api.receive("fromMain", async(data) => {
+          if (data.name == 'projectpath') {
+            if (projectPath != '') return;
+            projectPath = data.value;
+            console.log("Path: ", projectPath);
       
+            window.api.send('toMain', {
+              name: 'project:getcontentdirs',
+              id: projectId,
+              projectPath: projectPath,
+            });
+      
+            return;
+          }
+      
+          if (data.name == 'done-saving') {
+            console.log('Rerendering');
+            await root.rerenderPage();
+            return;
+          }
+      
+          if (data.name == 'urlpaths') {
+            this.urlpaths = data.value;
+            return;
+          }
+      
+        });
+      } catch (error) {
+      
+      }
+
     },
     async mounted() {
       // Step 1. Retrieves Necessary Files
@@ -373,18 +416,15 @@ function startPage() {
       const dirRes = await fetch(`.eternal/directory.json`); // Get Directory
       this.dir = await dirRes.json();
 
+      projectId = this.meta.id;
+      this.parentlists = Object.keys(this.dir);
+
       // Step 2. Gets Page URL
       pageName = this.getPageUrl();
 
       await this.readPage(pageName);
 
       if (this.isElectron()) {
-        window.api.send('toMain', {
-          name: 'project:getcontentdirs',
-          id: this.meta.id,
-          projectPath: projectPath,
-        });
-
         window.api.send('toMain', {
           name: 'project:getpath',
           id: this.meta.id

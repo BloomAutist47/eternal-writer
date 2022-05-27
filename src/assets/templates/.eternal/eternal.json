@@ -27,7 +27,6 @@
             "Magic": "magic",
             "Creatures": "creatures"
         },
-        "Librarium": {"_default": "librarium"},
-        "About": {"_default": "about"}
+        "Librarium": {"_default": "librarium"}
     }
 }

@@ -161,8 +161,8 @@ ipcMain.on("toMain", async(event, value) => {
 
     // Create Window
     const win = new BrowserWindow({
-      width: 1200,///800,
-      height: 800,
+      width: 1200,
+      height: 700,
       // autoHideMenuBar: true,
       // frame: false,
       // resizable: false,
@@ -219,14 +219,15 @@ ipcMain.on("toMain", async(event, value) => {
   if (value.name == 'project:getcontentdirs') {
     const id = value.id;
     const results = getDirectoriesRecursive(value.projectPath + '\\content\\');
+    console.log(results);
     let paths = [];
     for (const result of results) {
       let rawPath = result.split('content\\')[1].trim();
       if (rawPath == '') {
-        paths.push('content\\page-name.html');
+        paths.push('content/');
         continue;
       }
-      paths.push('content\\' + rawPath + '\\page-name.html');
+      paths.push('content/' + rawPath.replace(/\\/g, '/') + '/');
     }
 
     projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'urlpaths', value: paths});

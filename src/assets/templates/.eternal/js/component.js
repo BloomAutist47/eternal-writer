@@ -495,6 +495,8 @@ const editor = {
   },
   props: {
     passedEditorData: { type: Object, required: true },
+    urlpaths: { type: Array, default: [] },
+    parentsList: { type: Array, default: [] },
   },
   emits: ['save-content', 'delete-page', 'update-project', 'new-page', 'history-previous'],
   components: ['markdown', 'btn', 'content-editor', 'profile-editor', 'meta-editor', 'tab-editor', 'select-drop', 'btnToggle', 'sidebar'],
@@ -659,7 +661,7 @@ const editor = {
 
         <div class="container px-0 pb-3">
           <div class="row">
-            <meta-editor :editor-data="editorData" @editor-changed="editorChanged" :order-from-parent="sendToChild" @send-data="(data) => tempPageData = data"/>
+            <meta-editor :editor-data="editorData" :urlpaths="urlpaths" :parents-list='parentsList' @editor-changed="editorChanged" :order-from-parent="sendToChild" @send-data="(data) => tempPageData = data"/>
           </div>
 
           <div class="row mt-2 ">
@@ -1052,13 +1054,16 @@ const metaEditor = {
       urlPath: "",
       descVal: "",
       
-      tempPageData: {}
+      tempPageData: {},
     };
   },
   emits: ['editor-changed', 'send-data'],
   props: {
     editorData: { type: Object, required: true },
-    orderFromParent: { type: String }
+    urlpaths: { type: Array, default: [] },
+    parentsList: { type: Array, default: [] },
+    orderFromParent: { type: String },
+    // dir:
   },
   components: ['textinput'],
   watch: {
@@ -1079,6 +1084,8 @@ const metaEditor = {
         if (this.urlPath.charAt(this.urlPath.length - 1) != '/') {
           this.urlPath += '/';
         }
+
+        // this.parentsList = this.dir
       }
     },
     orderFromParent: {
@@ -1118,9 +1125,9 @@ const metaEditor = {
         <tr class="input-text input-text--visual">
           <textinput id="pageTitle" name="Url Name" place-holder="page file name" v-model="urlName" @editor-changed="$emit('editor-changed')"/> </tr>
         <tr class="input-text input-text--visual">
-          <textinput id="pageTitle" name="Path" place-holder="page file name" v-model="urlPath" @editor-changed="$emit('editor-changed')"/> </tr>
+          <textinput id="pageTitle" name="Path" place-holder="page file name" v-model="urlPath" @editor-changed="$emit('editor-changed')" :autocomplete-data="urlpaths"/> </tr>
         <tr class="input-text input-text--visual">
-          <textinput id="pageParent" name="Parent" place-holder="Parent page for breadcrumbs" v-model="parentVal" @editor-changed="$emit('editor-changed')"/> </tr>
+          <textinput id="pageParent" name="Parent" place-holder="Parent page for breadcrumbs" v-model="parentVal" @editor-changed="$emit('editor-changed')" :autocomplete-data="parentsList"/> </tr>
         <tr class="input-text input-text--visual">
           <textinput id="Tags" name="Tags" place-holder="TagA TagB TagC" v-model="tagsVal" @editor-changed="$emit('editor-changed')"/> </tr>
           <tr class="input-text input-text--visual">
@@ -1300,6 +1307,7 @@ const textInput = {
     placeHolder: { type: String, default: "" },
     modelValue: { type: String, default: "" },
     noName: { type: Boolean, default: false },
+    autocompleteData: { type: Array, default: []}
   },
   computed: {
     value: {
@@ -1314,7 +1322,16 @@ const textInput = {
   },
   template: `
     <td class="textinput-label" ><label :for="id" v-if="noName == false"> {{ name }}: </label></td>
-    <td class="textinput-input" ><input type="text" :id="id" :name="name" class="outline-primary" :placeHolder="placeHolder" v-model="value" /></td>
+    <td class="textinput-input" >
+      <input v-if="autocompleteData.length == 0" type="text" :id="id" :name="name" class="outline-primary" :placeHolder="placeHolder" v-model="value" />
+      <input v-else type="text" :id="id" :list="id + '-list'" :name="name" class="outline-primary" :placeHolder="placeHolder" v-model="value" />
+      <template>
+        <datalist v-if="autocompleteData.length !== 0" :id="id + '-list'">
+          <option v-for="value in autocompleteData">{{value}}</option>
+        </datalist>
+      </template>
+    
+    </td>
   `
 };
 
