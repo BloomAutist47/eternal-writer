@@ -8230,6 +8230,7 @@ div.jsoneditor-statusbar > .jsoneditor-size-info {
 }
 
 .btn--link {
+  margin: 0em;
   color: #0d6efd;
   background-color: transparent;
 }
