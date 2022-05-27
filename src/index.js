@@ -204,15 +204,19 @@ ipcMain.on("toMain", async(event, value) => {
 
     const dir = fs.readFileSync(value.data.projectPath  + "\\.eternal\\directory.json");
     let dirJson = JSON.parse(dir);
-
+    
     // Move file to trash bin
     const pagePath = dirJson[value.data.pageName].path;
-    fs.move(value.data.projectPath + '\\' + pagePath.replace(/\//g, '\\'), value.data.projectPath + `\\trash\\${value.data.pageName}.html`);
-
+    try {
+      await fs.move(value.data.projectPath + '\\' + pagePath.replace(/\//g, '\\'), value.data.projectPath + `\\trash\\${value.data.pageName}.html`);
+    } catch (error) {
+      await fs.move(value.data.projectPath + '\\' + pagePath.replace(/\//g, '\\'), value.data.projectPath + `\\trash\\${value.data.pageName}-${makeid(8)}.html`);
+    }
+    
     // Delete file from directory
     delete dirJson[value.data.pageName];
     fs.writeFileSync(value.data.projectPath + "\\.eternal\\directory.json", JSON.stringify(dirJson, null, 2));  
-
+    console.log("Deleted!");
     return;
   }
 
@@ -238,6 +242,41 @@ ipcMain.on("toMain", async(event, value) => {
     const id = value.id;
     projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'projectpath', value: projectPaths[value.id].path});
     return;
+  }
+
+  if (value.name == 'project:gettemplates') {
+    const id = value.id;
+    const results = getFilesRecursive(value.projectPath + '\\assets\\templates\\');
+    let paths = [];
+    for (const result of results) {
+      let rawPath = result.split('templates\\')[1].trim();
+      paths.push(rawPath.replace(/\\/g, '/').replace('.html', ''));
+    }
+    projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'templateList', value: paths});
+    return;
+  }
+
+  
+  if (value.name == 'project:setastemplate') {
+    const urlName = value.urlName;
+    const urlPath = value.urlPath;
+    const id = value.id;
+
+    // Copy file to template folder
+    await fs.copy(`${value.projectPath}\\${urlPath.replace(/\//g, '\\')}`, `${value.projectPath}\\assets\\templates\\${urlName}.html`);
+    console.log('Template Saved!');
+
+    // Update template lists
+    const results = getFilesRecursive(value.projectPath + '\\assets\\templates\\');
+    let paths = [];
+    for (const result of results) {
+      let rawPath = result.split('templates\\')[1].trim();
+      paths.push(rawPath.replace(/\\/g, '/').replace('.html', ''));
+    }
+    projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'templateList', value: paths});
+    return;
+
+
   }
 
 });
@@ -270,9 +309,7 @@ function makeid(length) {
   }
 }
 
-function flatten(lists) {
-  return lists.reduce((a, b) => a.concat(b), []);
-}
+// Getting All folders in subdirectories
 
 function getDirectories(srcpath) {
   return fs.readdirSync(srcpath)
@@ -281,5 +318,16 @@ function getDirectories(srcpath) {
 }
 
 function getDirectoriesRecursive(srcpath) {
-  return [srcpath, ...flatten(getDirectories(srcpath).map(getDirectoriesRecursive))];
+  return [srcpath, ...(getDirectories(srcpath).map(getDirectoriesRecursive)).reduce((a, b) => a.concat(b), [])];
+}
+
+// Getting all files in subdirectories
+function getFilesRecursive(srcpath) {
+  let files = [];
+  fs.readdirSync(srcpath).forEach(file => {
+      const Absolute = path.join(srcpath, file);
+      if (fs.statSync(Absolute).isDirectory()) return ThroughDirectory(Absolute);
+      else return files.push(Absolute);
+  });
+  return files;
 }
