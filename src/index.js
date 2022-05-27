@@ -219,7 +219,7 @@ ipcMain.on("toMain", async(event, value) => {
   if (value.name == 'project:getcontentdirs') {
     const id = value.id;
     const results = getDirectoriesRecursive(value.projectPath + '\\content\\');
-    console.log(results);
+
     let paths = [];
     for (const result of results) {
       let rawPath = result.split('content\\')[1].trim();
