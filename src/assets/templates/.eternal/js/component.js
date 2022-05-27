@@ -497,6 +497,8 @@ const editor = {
     passedEditorData: { type: Object, required: true },
     urlpaths: { type: Array, default: [] },
     parentsList: { type: Array, default: [] },
+    isNewPage: { type: Boolean, default: false },
+    dir: { type: Object, required: true },
   },
   emits: ['save-content', 'delete-page', 'update-project', 'new-page', 'history-previous'],
   components: ['markdown', 'btn', 'content-editor', 'profile-editor', 'meta-editor', 'tab-editor', 'select-drop', 'btnToggle', 'sidebar'],
@@ -542,6 +544,11 @@ const editor = {
 
       if (this.tempPageData.urlPath.toLowerCase().includes('.html')) {
         this.$emit('send-data', null);
+        return;
+      }
+
+      if (this.isNewPage === true && this.dir.hasOwnProperty(this.tempPageData.urlName)) {
+        console.log("Page Name already exists!");
         return;
       }
 
@@ -1094,8 +1101,6 @@ const metaEditor = {
         if (!newVal) return;
         switch (newVal) {
           case "sendData":
-            const urlNameSplit = this.urlName.split("/");
-
             this.tempPageData.title = this.titleVal.trim();
             this.tempPageData.parent = this.parentVal.trim();
             this.tempPageData.tags = this.tagsVal.trim();
