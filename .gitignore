@@ -90,7 +90,9 @@ out/
 
 
 # others
-scratch/
+.scratch/
 .unotes/
 .vscode/
 package-lock.json
+
+assets/original_art.png
