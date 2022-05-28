@@ -28,12 +28,14 @@ var createWindow = () => {
     autoHideMenuBar: true,
     frame: false,
     resizable: false,
+    icon: path.join(__dirname, "app.ico"),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: true,
       worldSafeExecuteJavaScript: true,
-      preload: path.join(__dirname, "js/preload.js")
+      preload: path.join(__dirname, "js/preload.js"),
+      
     }
   });
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
@@ -166,12 +168,14 @@ ipcMain.on("toMain", async(event, value) => {
       // autoHideMenuBar: true,
       // frame: false,
       // resizable: false,
+      icon: path.join(__dirname, "app.ico"),
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
         enableRemoteModule: true,
         worldSafeExecuteJavaScript: true,
-        preload: path.join(__dirname, "js/preload.js")
+        preload: path.join(__dirname, "js/preload.js"),
+        
       }
     });
 
@@ -181,7 +185,7 @@ ipcMain.on("toMain", async(event, value) => {
 
     win.loadFile(filePaths[0] + "\\" + json.main);
     win.show();
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
 
     projectPaths[json.id].mainWindow = win;
   
