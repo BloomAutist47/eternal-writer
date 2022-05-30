@@ -743,7 +743,7 @@ const sideBar = {
       document.getElementById('sidebar').classList.add('hide');
     },
     deletePage() {
-      if (!confirm('Do you really want to delete this page?')) return;
+      if (!window.confirm('Do you really want to delete this page?')) return;
       this.$emit('delete-page');
       this.closeSidebar();
     },
@@ -1459,5 +1459,31 @@ const dropdown = {
       </select>
     </div>
 
+  `
+};
+
+const confirmBox = {
+  name: `confirm-box`,
+  components: ['btn'],
+  props: {
+    text: { type: String, required: true },
+    func: { type: Function, required: true }
+  },
+  methods: {
+    confirm() {
+      this.func();
+    },
+    cancel() {
+
+    },
+  },
+  template: `
+    <div class="confirmbox center">
+      <div>
+      <btn :text="Confirm" class="font--medium" @btn-click="confirm"/>
+      <btn :text="Cancel" class="font--medium" @btn-click="cancel"/>
+      </div>
+      
+    </div>
   `
 };
