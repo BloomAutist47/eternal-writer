@@ -2,6 +2,8 @@
 
 An offline, easy to use wiki-writing app inspired by wikidot.
 
+Currently in development.
+
 # Credits
 * [NodeJS](https://nodejs.org/en/)
 * [ElectronJS](https://www.electronjs.org/)
