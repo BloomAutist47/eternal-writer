@@ -107,7 +107,14 @@ ipcMain.on("toMain", async(event, value) => {
     // Save to Dir
     const dir = fs.readFileSync(projectPath + ".eternal\\directory.json");
     let dirJson = JSON.parse(dir);
+    
+    // Checks if rename
+    if (value.info.originalName !== 'home' && value.info.isNewPage == false && value.info.originalName !== value.pageData.urlName) {
+      delete dirJson[value.info.originalName];
+      fs.unlinkSync(projectPath + value.info.originalPath.replace(/\//g, "\\"));
+    }
 
+    // Checks path integrity
     if (dirJson.hasOwnProperty(urlName)) {
       const origPath = projectPath + dirJson[urlName].path.replace(/\//g, '\\');
 
