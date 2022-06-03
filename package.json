@@ -5,7 +5,8 @@
   "description": "My Electron application description",
   "main": "src/index.js",
   "scripts": {
-    "start": "electron-forge start",
+    "build-vue": "node scripts/script-combiner.js",
+    "start": "npm run build-vue && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",

@@ -77,11 +77,11 @@ ipcMain.on("toMain", async(event, value) => {
     const filePath = value.data.path + `\\${value.data.name}\\`;
     fs.copy(path.join(__dirname) + templateLocation, filePath, function(err, data) {
 
-      let rawdata = fs.readFileSync(filePath + "\\.eternal\\eternal.json");
+      let rawdata = fs.readFileSync(filePath + "\\.eternal\\eternal.json", 'utf8');
       let json = JSON.parse(rawdata);
       json.id = makeid(50);
       json.projectTitle = value.data.name;
-      fs.writeFileSync(filePath + "\\.eternal\\eternal.json", JSON.stringify(json, null, 2));
+      fs.writeFileSync(filePath + "\\.eternal\\eternal.json", JSON.stringify(json, null, 2), {encoding: 'utf-8'});
     });
     return;
   }
@@ -105,7 +105,7 @@ ipcMain.on("toMain", async(event, value) => {
     const urlName = value.pageData.urlName;
 
     // Save to Dir
-    const dir = fs.readFileSync(projectPath + ".eternal\\directory.json");
+    const dir = fs.readFileSync(projectPath + ".eternal\\directory.json", 'utf8');
     let dirJson = JSON.parse(dir);
     
     // Checks if rename
@@ -139,10 +139,10 @@ ipcMain.on("toMain", async(event, value) => {
       "parent": value.pageData.parent,
     };
 
-    fs.writeFileSync(projectPath + ".eternal\\directory.json", JSON.stringify(dirJson, null, 2));  
+    fs.writeFileSync(projectPath + ".eternal\\directory.json", JSON.stringify(dirJson, null, 2), {encoding: 'utf-8'});  
     
     // Save Page
-    fs.writeFileSync(pagePath, saveData);
+    fs.writeFileSync(pagePath, saveData, {encoding: 'utf-8'});
 
     // Send signal that saving is done
     projectPaths[value.id].mainWindow.webContents.send('fromMain', {name: 'done-saving', value: null});
@@ -159,8 +159,15 @@ ipcMain.on("toMain", async(event, value) => {
     if (canceled) {
       return;
     } 
+
+    let rawdata;
+    try {
+      rawdata = fs.readFileSync(filePaths[0] + "\\.eternal\\eternal.json", 'utf8');
+    } catch (error) {
+      console.log("Project path is invalid");
+      return;
+    }
     
-    let rawdata = fs.readFileSync(filePaths[0] + "\\.eternal\\eternal.json");
     let json = JSON.parse(rawdata);
     
     if (projectPaths.hasOwnProperty(json.id)) {
@@ -194,7 +201,7 @@ ipcMain.on("toMain", async(event, value) => {
 
     win.loadFile(filePaths[0] + "\\" + json.main);
     win.show();
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
 
     projectPaths[json.id].mainWindow = win;
   
@@ -215,7 +222,7 @@ ipcMain.on("toMain", async(event, value) => {
 
   if (value.name == 'project:deletepage') {
 
-    const dir = fs.readFileSync(value.data.projectPath  + "\\.eternal\\directory.json");
+    const dir = fs.readFileSync(value.data.projectPath  + "\\.eternal\\directory.json", 'utf8');
     let dirJson = JSON.parse(dir);
     
     // Move file to trash bin
@@ -228,7 +235,7 @@ ipcMain.on("toMain", async(event, value) => {
     
     // Delete file from directory
     delete dirJson[value.data.pageName];
-    fs.writeFileSync(value.data.projectPath + "\\.eternal\\directory.json", JSON.stringify(dirJson, null, 2));  
+    fs.writeFileSync(value.data.projectPath + "\\.eternal\\directory.json", JSON.stringify(dirJson, null, 2), {encoding: 'utf-8'});  
     console.log("Deleted!");
     return;
   }
