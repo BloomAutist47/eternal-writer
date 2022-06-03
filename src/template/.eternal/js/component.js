@@ -523,7 +523,6 @@ const editor = {
     },
     toggleSideBar() {
       document.getElementById('sidebar').classList.toggle("hide");
-      console.log(document.getElementById('sidebar'));
     },
     openEditorTab(tabName) {
       const tabList = ['content-editor', 'manage-tab', 'profile-box', 'scripts-tab'];
@@ -638,14 +637,12 @@ const editor = {
             pageid: tab + "-page",
           };
           this.editorData.contentData[area].push(obj);
-          console.log(obj);
         }
       }
 
       this.sendToChild = "refresh";
       await this.$nextTick();
       this.sendToChild = "";
-      console.log(this.editorData);
     },
     newPage(value) {
       this.$emit('new-page', value);
@@ -1251,7 +1248,6 @@ const tabEditor = {
       };
 
       this.selectedTabId = id;
-      console.log(this.tabName);
       this.sendData();
     },
     tabAdd(area) {
