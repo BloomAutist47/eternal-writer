@@ -584,7 +584,7 @@ ipcMain.on("toMain", function _callee2(event, value) {
           _id5 = value.id;
           alert = new Alert();
           _context2.next = 189;
-          return regeneratorRuntime.awrap(alert.fireFrameless(value.swalOptions, null, true, false));
+          return regeneratorRuntime.awrap(alert.fireWithFrame(value.swalOptions, null, true, false));
 
         case 189:
           resp = _context2.sent;

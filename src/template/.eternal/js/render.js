@@ -229,7 +229,14 @@ function startPage() {
         // Validator
         if (!this.isElectron) return;
         if (pageName === 'home') {
-          alert('Home Page cannot be deleted');
+          sendToMain('dialog:alert', {
+            swalOptions: {
+              title: "Deletion Warning",
+              text: "Home Page cannot be deleted",
+              icon: "warning",
+              showCancelButton: false
+            }
+          });
           return;
         }
         if (!this.dir.hasOwnProperty(pageName)) {
@@ -653,8 +660,13 @@ function startPage() {
   root = app.mount('#app');
 }
 
-function sendToMain(params) {
-  
+function sendToMain(name, value) {
+  window.api.send('toMain', {
+    name: name,
+    id: projectId,
+    projectPath: projectPath,
+    ...value
+  });
 }
 
 /**

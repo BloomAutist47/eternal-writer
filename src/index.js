@@ -2,7 +2,7 @@
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const os = require('os-utils');
+const Alert = require('electron-alert');
 const fs = require('fs-extra');
 const pretty = require('@financial-times/pretty');  
 
@@ -204,7 +204,7 @@ ipcMain.on("toMain", async(event, value) => {
     win.webContents.openDevTools();
 
     projectPaths[json.id].mainWindow = win;
-  
+    
     return;
   }
 
@@ -276,7 +276,6 @@ ipcMain.on("toMain", async(event, value) => {
     return;
   }
 
-  
   if (value.name == 'project:setastemplate') {
     const urlName = value.urlName;
     const urlPath = value.urlPath;
@@ -295,8 +294,17 @@ ipcMain.on("toMain", async(event, value) => {
     }
     projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'templateList', value: paths});
     return;
+  }
 
-
+  if (value.name == 'dialog:alert') {
+    const id = value.id;
+    const alert = new Alert();
+    
+    let resp = await alert.fireWithFrame(value.swalOptions, null, true, false);
+    projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'dialog:alert:response', value: resp.isConfirmed});
+    
+    console.log("res: ", resp);
+    return;
   }
 
 });
