@@ -2,11 +2,13 @@
 
 // Global Variables
 var pageName = ''; // urlName of page
+var pressedKey = '';
 
 var idList = []; // ID list for the makeid() function
 var root; // Reference to Vue App
 var projectId = ''; // Long random id of project
 var projectPath = ''; // Absolute path of project
+
 
 /**
  * Start Page.
@@ -17,6 +19,15 @@ var projectPath = ''; // Absolute path of project
  * @see        TextRenderer
  */
 function startPage() {
+  document.addEventListener('keydown', (e) => {
+    if (e.code != 'ControlLeft') return;
+    pressedKey = 'ControlLeft';
+  });
+
+  document.addEventListener('keyup', (e) => {
+    pressedKey = '';
+  });
+
   const app = Vue.createApp({
     data() {
       return {
@@ -197,6 +208,12 @@ function startPage() {
        * @param {string}   urlName  unique name id of url in directory. 
        */
       async gotoPage(urlName) {
+
+        if (this.isElectron !== true && pressedKey == 'ControlLeft') {
+          window.open(window.location.origin + "?p=" + urlName, '_blank').focus();
+          return;
+        }
+
         await this.readPage(urlName);
       },
 
