@@ -577,7 +577,7 @@ ipcMain.on("toMain", function _callee2(event, value) {
 
         case 184:
           if (!(value.name == 'dialog:alert')) {
-            _context2.next = 193;
+            _context2.next = 192;
             break;
           }
 
@@ -590,14 +590,13 @@ ipcMain.on("toMain", function _callee2(event, value) {
           resp = _context2.sent;
 
           projectPaths[_id5].mainWindow.webContents.send('fromMain', {
-            name: 'dialog:alert:response',
+            name: value.responseName,
             value: resp.isConfirmed
           });
 
-          console.log("res: ", resp);
           return _context2.abrupt("return");
 
-        case 193:
+        case 192:
         case "end":
           return _context2.stop();
       }

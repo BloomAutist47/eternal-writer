@@ -283,34 +283,17 @@ function startPage() {
 
               case 2:
                 if (!(pageName === 'home')) {
-                  _context3.next = 5;
+                  _context3.next = 4;
                   break;
                 }
 
-                sendToMain('dialog:alert', {
-                  swalOptions: {
-                    title: "Deletion Warning",
-                    text: "Home Page cannot be deleted",
-                    icon: "warning",
-                    showCancelButton: false
-                  }
-                });
                 return _context3.abrupt("return");
 
-              case 5:
-                if (this.dir.hasOwnProperty(pageName)) {
-                  _context3.next = 8;
-                  break;
-                }
-
-                console.log("Cannot Delete nonexistent page");
-                return _context3.abrupt("return");
-
-              case 8:
+              case 4:
                 // Deletes page from directory
                 delete this.dir[pageName]; // code to move file into trash bin
 
-                _context3.next = 11;
+                _context3.next = 7;
                 return regeneratorRuntime.awrap(window.api.send('toMain', {
                   name: 'project:deletepage',
                   data: {
@@ -319,25 +302,79 @@ function startPage() {
                   }
                 }));
 
-              case 11:
-                _context3.next = 13;
+              case 7:
+                _context3.next = 9;
                 return regeneratorRuntime.awrap(this.readPage('home'));
 
-              case 13:
+              case 9:
                 document.getElementById('sidebar').classList.add('hide'); // Updates Lists
 
                 this.parentlists = Object.keys(this.dir); // Updates urlPath autocomplete data
 
-                _context3.next = 17;
+                _context3.next = 13;
                 return regeneratorRuntime.awrap(window.api.send('toMain', {
                   name: 'project:getcontentdirs',
                   id: projectId,
                   projectPath: projectPath
                 }));
 
-              case 17:
+              case 13:
               case "end":
                 return _context3.stop();
+            }
+          }
+        }, null, this);
+      },
+      deletePageConfirm: function deletePageConfirm() {
+        return regeneratorRuntime.async(function deletePageConfirm$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                if (this.isElectron) {
+                  _context4.next = 2;
+                  break;
+                }
+
+                return _context4.abrupt("return");
+
+              case 2:
+                if (!(pageName === 'home')) {
+                  _context4.next = 5;
+                  break;
+                }
+
+                sendToMain('dialog:alert', null, {
+                  swalOptions: {
+                    title: "Home Page cannot be deleted",
+                    text: "This is the most important page of your project.",
+                    icon: "warning",
+                    showCancelButton: false
+                  }
+                });
+                return _context4.abrupt("return");
+
+              case 5:
+                if (this.dir.hasOwnProperty(pageName)) {
+                  _context4.next = 8;
+                  break;
+                }
+
+                console.log("Cannot Delete nonexistent page");
+                return _context4.abrupt("return");
+
+              case 8:
+                sendToMain('dialog:alert', 'response:delete', {
+                  swalOptions: {
+                    title: "Are you sure you want to delete this page?",
+                    text: "You can still find it in the trash folder if you changed your mind",
+                    icon: "warning",
+                    showCancelButton: true
+                  }
+                });
+
+              case 9:
+              case "end":
+                return _context4.stop();
             }
           }
         }, null, this);
@@ -351,9 +388,9 @@ function startPage() {
        * @access     private
        */
       newPage: function newPage(selectedTemplate) {
-        return regeneratorRuntime.async(function newPage$(_context4) {
+        return regeneratorRuntime.async(function newPage$(_context5) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
                 pageName = 'new-page';
                 window.history.replaceState(null, null, "?p=new-page");
@@ -361,19 +398,19 @@ function startPage() {
                 console.log('Template: ', selectedTemplate);
 
                 if (!(selectedTemplate == '')) {
-                  _context4.next = 9;
+                  _context5.next = 9;
                   break;
                 }
 
-                _context4.next = 7;
+                _context5.next = 7;
                 return regeneratorRuntime.awrap(this.renderPage('pageNull', 'assets/new-page.html', true));
 
               case 7:
-                _context4.next = 11;
+                _context5.next = 11;
                 break;
 
               case 9:
-                _context4.next = 11;
+                _context5.next = 11;
                 return regeneratorRuntime.awrap(this.renderPage('pageNull', "assets/templates/".concat(selectedTemplate, ".html"), true));
 
               case 11:
@@ -381,7 +418,7 @@ function startPage() {
 
               case 12:
               case "end":
-                return _context4.stop();
+                return _context5.stop();
             }
           }
         }, null, this);
@@ -397,16 +434,16 @@ function startPage() {
        */
       saveContent: function saveContent(data) {
         var pagePath, originalPath;
-        return regeneratorRuntime.async(function saveContent$(_context5) {
+        return regeneratorRuntime.async(function saveContent$(_context6) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
                 if (this.isElectron) {
-                  _context5.next = 2;
+                  _context6.next = 2;
                   break;
                 }
 
-                return _context5.abrupt("return");
+                return _context6.abrupt("return");
 
               case 2:
                 // Ensures home
@@ -424,7 +461,7 @@ function startPage() {
                 originalPath = pagePath.slice() + pageName.replace(/\s/g, '-') + '.html';
                 pagePath += data.pageData.urlName.replace(/\s/g, '-') + '.html'; // Send to electron
 
-                _context5.next = 9;
+                _context6.next = 9;
                 return regeneratorRuntime.awrap(window.api.send('toMain', {
                   name: 'project:save',
                   id: this.meta.id,
@@ -455,7 +492,7 @@ function startPage() {
 
                 this.parentlists = Object.keys(this.dir); // Updates urlPath autocomplete data
 
-                _context5.next = 14;
+                _context6.next = 14;
                 return regeneratorRuntime.awrap(window.api.send('toMain', {
                   name: 'project:getcontentdirs',
                   id: projectId,
@@ -465,7 +502,7 @@ function startPage() {
               case 14:
                 // Saves for rerender
                 this.clearVars();
-                _context5.next = 17;
+                _context6.next = 17;
                 return regeneratorRuntime.awrap(this.$nextTick());
 
               case 17:
@@ -474,7 +511,7 @@ function startPage() {
 
               case 19:
               case "end":
-                return _context5.stop();
+                return _context6.stop();
             }
           }
         }, null, this);
@@ -489,11 +526,11 @@ function startPage() {
        * @access     public
        */
       rerenderPage: function rerenderPage() {
-        return regeneratorRuntime.async(function rerenderPage$(_context6) {
+        return regeneratorRuntime.async(function rerenderPage$(_context7) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
-                _context6.next = 2;
+                _context7.next = 2;
                 return regeneratorRuntime.awrap(this.renderPage('rerender', this.rerenderData));
 
               case 2:
@@ -501,7 +538,7 @@ function startPage() {
 
               case 3:
               case "end":
-                return _context6.stop();
+                return _context7.stop();
             }
           }
         }, null, this);
@@ -516,9 +553,9 @@ function startPage() {
        * @param {string}   urlName  name of page in dir.
        */
       readPage: function readPage(urlName) {
-        return regeneratorRuntime.async(function readPage$(_context7) {
+        return regeneratorRuntime.async(function readPage$(_context8) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
                 pageName = urlName.replace(/\s/g, '-').trim();
 
@@ -531,68 +568,68 @@ function startPage() {
                 this.clearVars();
 
                 if (this.dir.hasOwnProperty(pageName)) {
-                  _context7.next = 13;
+                  _context8.next = 13;
                   break;
                 }
 
-                _context7.prev = 4;
-                _context7.next = 7;
+                _context8.prev = 4;
+                _context8.next = 7;
                 return regeneratorRuntime.awrap(this.renderPage('pageNull', 'assets/page-not-found.html'));
 
               case 7:
-                _context7.next = 12;
+                _context8.next = 12;
                 break;
 
               case 9:
-                _context7.prev = 9;
-                _context7.t0 = _context7["catch"](4);
-                console.log(_context7.t0);
+                _context8.prev = 9;
+                _context8.t0 = _context8["catch"](4);
+                console.log(_context8.t0);
 
               case 12:
-                return _context7.abrupt("return");
+                return _context8.abrupt("return");
 
               case 13:
-                _context7.next = 15;
+                _context8.next = 15;
                 return regeneratorRuntime.awrap(this.renderPage('normal', this.dir[pageName].path));
 
               case 15:
               case "end":
-                return _context7.stop();
+                return _context8.stop();
             }
           }
         }, null, this, [[4, 9]]);
       },
       fetchHTML: function fetchHTML(src) {
         var response, text;
-        return regeneratorRuntime.async(function fetchHTML$(_context8) {
+        return regeneratorRuntime.async(function fetchHTML$(_context9) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
-                _context8.next = 2;
+                _context9.next = 2;
                 return regeneratorRuntime.awrap(fetch(src));
 
               case 2:
-                response = _context8.sent;
+                response = _context9.sent;
 
                 if (!(response.status === 400)) {
-                  _context8.next = 5;
+                  _context9.next = 5;
                   break;
                 }
 
-                return _context8.abrupt("return", null);
+                return _context9.abrupt("return", null);
 
               case 5:
-                _context8.next = 7;
+                _context9.next = 7;
                 return regeneratorRuntime.awrap(response.text());
 
               case 7:
-                text = _context8.sent;
+                text = _context9.sent;
                 text.replace(/&gt;/gm, '>');
-                return _context8.abrupt("return", text);
+                return _context9.abrupt("return", text);
 
               case 10:
               case "end":
-                return _context8.stop();
+                return _context9.stop();
             }
           }
         });
@@ -637,13 +674,13 @@ function startPage() {
             _iterator,
             _step,
             item,
-            _args9 = arguments;
+            _args10 = arguments;
 
-        return regeneratorRuntime.async(function renderPage$(_context9) {
+        return regeneratorRuntime.async(function renderPage$(_context10) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
-                isNewPage = _args9.length > 2 && _args9[2] !== undefined ? _args9[2] : false;
+                isNewPage = _args10.length > 2 && _args10[2] !== undefined ? _args10[2] : false;
                 // Step 3. Set Page General Data
                 this.headerNavBtn = this.meta.headerNavigation;
                 this.projectTitle = this.meta.projectTitle;
@@ -651,56 +688,56 @@ function startPage() {
                 this.areaToggle = getSpoilerStorageValue();
                 pageRaw = '';
                 document.getElementById('projectTitle').innerText = this.projectTitle;
-                _context9.t0 = mode;
-                _context9.next = _context9.t0 === 'normal' ? 10 : _context9.t0 === 'pageNull' ? 29 : _context9.t0 === 'rerender' ? 40 : 44;
+                _context10.t0 = mode;
+                _context10.next = _context10.t0 === 'normal' ? 10 : _context10.t0 === 'pageNull' ? 29 : _context10.t0 === 'rerender' ? 40 : 44;
                 break;
 
               case 10:
-                _context9.prev = 10;
-                _context9.next = 13;
+                _context10.prev = 10;
+                _context10.next = 13;
                 return regeneratorRuntime.awrap(this.fetchHTML(data));
 
               case 13:
-                pageFile = _context9.sent;
+                pageFile = _context10.sent;
 
                 if (!(pageFile == null)) {
-                  _context9.next = 18;
+                  _context10.next = 18;
                   break;
                 }
 
-                _context9.next = 17;
+                _context10.next = 17;
                 return regeneratorRuntime.awrap(this.renderPage('pageNull', 'assets/page-not-found.html'));
 
               case 17:
-                return _context9.abrupt("return");
+                return _context10.abrupt("return");
 
               case 18:
-                _context9.next = 25;
+                _context10.next = 25;
                 break;
 
               case 20:
-                _context9.prev = 20;
-                _context9.t1 = _context9["catch"](10);
-                _context9.next = 24;
+                _context10.prev = 20;
+                _context10.t1 = _context10["catch"](10);
+                _context10.next = 24;
                 return regeneratorRuntime.awrap(this.renderPage('pageNull', 'assets/page-not-found.html'));
 
               case 24:
-                return _context9.abrupt("return");
+                return _context10.abrupt("return");
 
               case 25:
                 pageRaw = pageFile.trim().split("<!-- File Content -->"); // Step 5. Processing Window Variables
 
                 loadScripts(pageRaw[0]);
                 this.isNewPage = false;
-                return _context9.abrupt("break", 44);
+                return _context10.abrupt("break", 44);
 
               case 29:
-                _context9.next = 31;
+                _context10.next = 31;
                 return regeneratorRuntime.awrap(this.fetchHTML(data));
 
               case 31:
-                _context9.t2 = pageName;
-                pageFile = _context9.sent.replace('[[pageName]]', _context9.t2);
+                _context10.t2 = pageName;
+                pageFile = _context10.sent.replace('[[pageName]]', _context10.t2);
                 pageRaw = pageFile.trim().split("<!-- File Content -->"); // Step 5. Processing Window Variables
 
                 loadScripts(pageRaw[0]);
@@ -708,13 +745,13 @@ function startPage() {
                 window.pageData.urlName = pageName.trim().toLowerCase().replace(/\s/g, '-');
                 if (isNewPage) window.pageData.urlName += '-' + makeid(5);
                 this.isNewPage = true;
-                return _context9.abrupt("break", 44);
+                return _context10.abrupt("break", 44);
 
               case 40:
                 window.profileData = data.profileData;
                 window.pageData = data.pageData;
                 this.isNewPage = false;
-                return _context9.abrupt("break", 44);
+                return _context10.abrupt("break", 44);
 
               case 44:
                 // Step 6. Set Page Specific Data
@@ -738,7 +775,7 @@ function startPage() {
 
               case 53:
                 if (!(_i < _areas.length)) {
-                  _context9.next = 80;
+                  _context10.next = 80;
                   break;
                 }
 
@@ -746,17 +783,17 @@ function startPage() {
                 areaDiv = parsedContent.getElementById(_area);
 
                 if (areaDiv) {
-                  _context9.next = 58;
+                  _context10.next = 58;
                   break;
                 }
 
-                return _context9.abrupt("continue", 77);
+                return _context10.abrupt("continue", 77);
 
               case 58:
                 _iteratorNormalCompletion2 = true;
                 _didIteratorError2 = false;
                 _iteratorError2 = undefined;
-                _context9.prev = 61;
+                _context10.prev = 61;
 
                 for (_iterator2 = areaDiv.querySelectorAll('.page-tab')[Symbol.iterator](); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                   _item = _step2.value;
@@ -765,42 +802,42 @@ function startPage() {
                   content.push("<div id=\"".concat(_item.id, "\" class=\"page-tag\">\n") + itemHtml + "\n</div>");
                 }
 
-                _context9.next = 69;
+                _context10.next = 69;
                 break;
 
               case 65:
-                _context9.prev = 65;
-                _context9.t3 = _context9["catch"](61);
+                _context10.prev = 65;
+                _context10.t3 = _context10["catch"](61);
                 _didIteratorError2 = true;
-                _iteratorError2 = _context9.t3;
+                _iteratorError2 = _context10.t3;
 
               case 69:
-                _context9.prev = 69;
-                _context9.prev = 70;
+                _context10.prev = 69;
+                _context10.prev = 70;
 
                 if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
                   _iterator2["return"]();
                 }
 
               case 72:
-                _context9.prev = 72;
+                _context10.prev = 72;
 
                 if (!_didIteratorError2) {
-                  _context9.next = 75;
+                  _context10.next = 75;
                   break;
                 }
 
                 throw _iteratorError2;
 
               case 75:
-                return _context9.finish(72);
+                return _context10.finish(72);
 
               case 76:
-                return _context9.finish(69);
+                return _context10.finish(69);
 
               case 77:
                 _i++;
-                _context9.next = 53;
+                _context10.next = 53;
                 break;
 
               case 80:
@@ -825,19 +862,19 @@ function startPage() {
                   profileData: window.profileData,
                   contentData: JSON.parse(JSON.stringify(this.pageContents))
                 };
-                _context9.t4 = regeneratorRuntime.keys(editorDataTemp.contentData);
+                _context10.t4 = regeneratorRuntime.keys(editorDataTemp.contentData);
 
               case 84:
-                if ((_context9.t5 = _context9.t4()).done) {
-                  _context9.next = 107;
+                if ((_context10.t5 = _context10.t4()).done) {
+                  _context10.next = 107;
                   break;
                 }
 
-                area = _context9.t5.value;
+                area = _context10.t5.value;
                 _iteratorNormalCompletion = true;
                 _didIteratorError = false;
                 _iteratorError = undefined;
-                _context9.prev = 89;
+                _context10.prev = 89;
 
                 for (_iterator = editorDataTemp.contentData[area][Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                   item = _step.value;
@@ -845,41 +882,41 @@ function startPage() {
                   delete item.profileBox;
                 }
 
-                _context9.next = 97;
+                _context10.next = 97;
                 break;
 
               case 93:
-                _context9.prev = 93;
-                _context9.t6 = _context9["catch"](89);
+                _context10.prev = 93;
+                _context10.t6 = _context10["catch"](89);
                 _didIteratorError = true;
-                _iteratorError = _context9.t6;
+                _iteratorError = _context10.t6;
 
               case 97:
-                _context9.prev = 97;
-                _context9.prev = 98;
+                _context10.prev = 97;
+                _context10.prev = 98;
 
                 if (!_iteratorNormalCompletion && _iterator["return"] != null) {
                   _iterator["return"]();
                 }
 
               case 100:
-                _context9.prev = 100;
+                _context10.prev = 100;
 
                 if (!_didIteratorError) {
-                  _context9.next = 103;
+                  _context10.next = 103;
                   break;
                 }
 
                 throw _iteratorError;
 
               case 103:
-                return _context9.finish(100);
+                return _context10.finish(100);
 
               case 104:
-                return _context9.finish(97);
+                return _context10.finish(97);
 
               case 105:
-                _context9.next = 84;
+                _context10.next = 84;
                 break;
 
               case 107:
@@ -895,7 +932,7 @@ function startPage() {
 
               case 111:
               case "end":
-                return _context9.stop();
+                return _context10.stop();
             }
           }
         }, null, this, [[10, 20], [61, 65, 69, 77], [70,, 72, 76], [89, 93, 97, 105], [98,, 100, 104]]);
@@ -920,9 +957,9 @@ function startPage() {
     created: function created() {
       var _this2 = this;
 
-      return regeneratorRuntime.async(function created$(_context11) {
+      return regeneratorRuntime.async(function created$(_context12) {
         while (1) {
-          switch (_context11.prev = _context11.next) {
+          switch (_context12.prev = _context12.next) {
             case 0:
               this.isElectronCheck(); // this.createScript(".eternal/js/editor/codeflask.min.js");
               // this.createScript(".eternal/js/editor/jsoneditor.js");
@@ -931,27 +968,27 @@ function startPage() {
 
               try {
                 window.api.receive("fromMain", function _callee(data) {
-                  return regeneratorRuntime.async(function _callee$(_context10) {
+                  return regeneratorRuntime.async(function _callee$(_context11) {
                     while (1) {
-                      switch (_context10.prev = _context10.next) {
+                      switch (_context11.prev = _context11.next) {
                         case 0:
                           if (!(data.name == 'projectpath')) {
-                            _context10.next = 10;
+                            _context11.next = 10;
                             break;
                           }
 
                           if (!(projectPath != '')) {
-                            _context10.next = 3;
+                            _context11.next = 3;
                             break;
                           }
 
-                          return _context10.abrupt("return");
+                          return _context11.abrupt("return");
 
                         case 3:
                           projectPath = data.value;
                           console.log("Path: ", projectPath); // Get urlPath autocomplete data
 
-                          _context10.next = 7;
+                          _context11.next = 7;
                           return regeneratorRuntime.awrap(window.api.send('toMain', {
                             name: 'project:getcontentdirs',
                             id: projectId,
@@ -959,7 +996,7 @@ function startPage() {
                           }));
 
                         case 7:
-                          _context10.next = 9;
+                          _context11.next = 9;
                           return regeneratorRuntime.awrap(window.api.send('toMain', {
                             name: 'project:gettemplates',
                             id: projectId,
@@ -967,42 +1004,59 @@ function startPage() {
                           }));
 
                         case 9:
-                          return _context10.abrupt("return");
+                          return _context11.abrupt("return");
 
                         case 10:
                           if (!(data.name == 'done-saving')) {
-                            _context10.next = 15;
+                            _context11.next = 15;
                             break;
                           }
 
                           console.log('Rerendering');
-                          _context10.next = 14;
+                          _context11.next = 14;
                           return regeneratorRuntime.awrap(_this2.rerenderPage());
 
                         case 14:
-                          return _context10.abrupt("return");
+                          return _context11.abrupt("return");
 
                         case 15:
                           if (!(data.name == 'urlpaths')) {
-                            _context10.next = 18;
+                            _context11.next = 18;
                             break;
                           }
 
                           _this2.urlpaths = data.value;
-                          return _context10.abrupt("return");
+                          return _context11.abrupt("return");
 
                         case 18:
                           if (!(data.name == 'templateList')) {
-                            _context10.next = 21;
+                            _context11.next = 21;
                             break;
                           }
 
                           _this2.templateList = data.value;
-                          return _context10.abrupt("return");
+                          return _context11.abrupt("return");
 
                         case 21:
+                          if (!(data.name == 'response:delete')) {
+                            _context11.next = 26;
+                            break;
+                          }
+
+                          if (!(data.value == true)) {
+                            _context11.next = 25;
+                            break;
+                          }
+
+                          _context11.next = 25;
+                          return regeneratorRuntime.awrap(_this2.deletePage());
+
+                        case 25:
+                          return _context11.abrupt("return");
+
+                        case 26:
                         case "end":
-                          return _context10.stop();
+                          return _context11.stop();
                       }
                     }
                   });
@@ -1011,53 +1065,53 @@ function startPage() {
 
             case 2:
             case "end":
-              return _context11.stop();
+              return _context12.stop();
           }
         }
       }, null, this);
     },
     mounted: function mounted() {
       var metaRes, dirRes;
-      return regeneratorRuntime.async(function mounted$(_context12) {
+      return regeneratorRuntime.async(function mounted$(_context13) {
         while (1) {
-          switch (_context12.prev = _context12.next) {
+          switch (_context13.prev = _context13.next) {
             case 0:
-              _context12.next = 2;
+              _context13.next = 2;
               return regeneratorRuntime.awrap(fetch(".eternal/eternal.json"));
 
             case 2:
-              metaRes = _context12.sent;
-              _context12.next = 5;
+              metaRes = _context13.sent;
+              _context13.next = 5;
               return regeneratorRuntime.awrap(metaRes.json());
 
             case 5:
-              this.meta = _context12.sent;
-              _context12.next = 8;
+              this.meta = _context13.sent;
+              _context13.next = 8;
               return regeneratorRuntime.awrap(fetch(".eternal/directory.json"));
 
             case 8:
-              dirRes = _context12.sent;
-              _context12.next = 11;
+              dirRes = _context13.sent;
+              _context13.next = 11;
               return regeneratorRuntime.awrap(dirRes.json());
 
             case 11:
-              this.dir = _context12.sent;
+              this.dir = _context13.sent;
               projectId = this.meta.id; // Save list for parent metada automcomplete data
 
               this.parentlists = Object.keys(this.dir); // Gets urlName
 
               pageName = this.getPageUrl(); // Read and renders page
 
-              _context12.next = 17;
+              _context13.next = 17;
               return regeneratorRuntime.awrap(this.readPage(pageName));
 
             case 17:
               if (!this.isElectron) {
-                _context12.next = 20;
+                _context13.next = 20;
                 break;
               }
 
-              _context12.next = 20;
+              _context13.next = 20;
               return regeneratorRuntime.awrap(window.api.send('toMain', {
                 name: 'project:getpath',
                 id: this.meta.id
@@ -1065,7 +1119,7 @@ function startPage() {
 
             case 20:
             case "end":
-              return _context12.stop();
+              return _context13.stop();
           }
         }
       }, null, this);
@@ -1094,11 +1148,12 @@ function startPage() {
   root = app.mount('#app');
 }
 
-function sendToMain(name, value) {
+function sendToMain(name, responseName, value) {
   window.api.send('toMain', _objectSpread({
     name: name,
     id: projectId,
-    projectPath: projectPath
+    projectPath: projectPath,
+    responseName: responseName
   }, value));
 }
 /**

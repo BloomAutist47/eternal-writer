@@ -301,11 +301,15 @@ ipcMain.on("toMain", async(event, value) => {
     const alert = new Alert();
     
     let resp = await alert.fireWithFrame(value.swalOptions, null, true, false);
-    projectPaths[id].mainWindow.webContents.send('fromMain', {name: 'dialog:alert:response', value: resp.isConfirmed});
+    projectPaths[id].mainWindow.webContents.send('fromMain', {
+      name: value.responseName, 
+      value: resp.isConfirmed
+    });
     
-    console.log("res: ", resp);
     return;
   }
+
+
 
 });
 

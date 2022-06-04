@@ -63,7 +63,7 @@ function startPage() {
         // Autocomplete data
         urlpaths: [],
         parentlists: [],
-        templateList:[],
+        templateList: [],
       };
     },
     methods: {
@@ -228,22 +228,8 @@ function startPage() {
       async deletePage() {
         // Validator
         if (!this.isElectron) return;
-        if (pageName === 'home') {
-          sendToMain('dialog:alert', {
-            swalOptions: {
-              title: "Deletion Warning",
-              text: "Home Page cannot be deleted",
-              icon: "warning",
-              showCancelButton: false
-            }
-          });
-          return;
-        }
-        if (!this.dir.hasOwnProperty(pageName)) {
-          console.log("Cannot Delete nonexistent page");
-          return;
-        }
-
+        if (pageName === 'home') return;
+        
         // Deletes page from directory
         delete this.dir[pageName];
 
@@ -269,6 +255,35 @@ function startPage() {
 
       },
 
+      async deletePageConfirm() {
+        if (!this.isElectron) return;
+        if (pageName === 'home') {
+          sendToMain('dialog:alert', null, {
+            swalOptions: {
+              title: "Home Page cannot be deleted",
+              text: "This is the most important page of your project.",
+              icon: "warning",
+              showCancelButton: false
+            }
+          });
+          return;
+        }
+        if (!this.dir.hasOwnProperty(pageName)) {
+          console.log("Cannot Delete nonexistent page");
+          return;
+        }
+
+
+        sendToMain('dialog:alert', 'response:delete', {
+          swalOptions: {
+            title: "Are you sure you want to delete this page?",
+            text: "You can still find it in the trash folder if you changed your mind",
+            icon: "warning",
+            showCancelButton: true
+          }
+        });
+      },
+
       /**
        * Create New Page.
        *
@@ -281,12 +296,12 @@ function startPage() {
         window.history.replaceState(null, null, `?p=new-page`);
         this.clearVars();
         console.log('Template: ', selectedTemplate);
-        if (selectedTemplate == '' ) {
+        if (selectedTemplate == '') {
           await this.renderPage('pageNull', 'assets/new-page.html', true);
         } else {
           await this.renderPage('pageNull', `assets/templates/${selectedTemplate}.html`, true);
         }
-        
+
         document.getElementById('sidebar').classList.add('hide');
       },
 
@@ -309,7 +324,7 @@ function startPage() {
 
         // Creates URLpath with urlName.html at the end /
         let pagePath = data.pageData.urlPath.slice().trim();
-        
+
         if (pagePath.charAt(pagePath.length - 1) != '/') {
           pagePath += '/';
         }
@@ -603,6 +618,11 @@ function startPage() {
             return;
           }
 
+          if (data.name == 'response:delete') {
+            if (data.value == true) await this.deletePage();
+            return;
+          }
+
         });
       } catch (error) {}
     },
@@ -660,14 +680,16 @@ function startPage() {
   root = app.mount('#app');
 }
 
-function sendToMain(name, value) {
+function sendToMain(name, responseName, value) {
   window.api.send('toMain', {
     name: name,
     id: projectId,
     projectPath: projectPath,
+    responseName: responseName,
     ...value
   });
 }
+
 
 /**
  * Get Page Data.
