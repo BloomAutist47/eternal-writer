@@ -653,6 +653,10 @@ function startPage() {
   root = app.mount('#app');
 }
 
+function sendToMain(params) {
+  
+}
+
 /**
  * Get Page Data.
  *
