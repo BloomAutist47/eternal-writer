@@ -1,0 +1,77 @@
+// ======== VARIABLE AREA ========
+$body-bg: #E7E7E2;
+$card-bg: white;
+$color-primary: #0d6efd;
+$color-error: #e82b2b;
+$color-light: #E7E7E2;
+$color-light2: #f6f6f6;
+
+$font-color-primary: $color-primary;
+$font-color-light: #fff;
+$font-color-dark: #2b2b2b;
+$font-family: 'Rubik Regular';
+$outline: lighten($color-primary, 30);
+
+// Button Variables    
+$btn-primary: $color-primary;
+$btn-primary--darken: 15%;
+$btn-primary--font: $font-color-light;
+
+// Header Variables
+$header-font: $font-family;
+   
+// BreadCrumb Variables
+$breadcrumbs-bg: $color-light2;
+$breadcrumbs-font-color: $font-color-dark;
+
+// TOC         
+$toc-bg: $color-light2;
+
+// ======== VARIABLE AREA ======== (DO NOT REMOVE THIS COMMENT)
+
+// External Import
+@import './boostrap/bootstrap-reboot';
+@import './boostrap/bootstrap-grid';
+@import './editor/easymde';
+@import './editor/jsoneditor'; 
+
+// Imports
+@import './font/font';
+@import './buttons';
+@import './utility';
+@import './default';
+@import './input';
+@import './dropdown';
+@import './quotation';
+
+// Imports Components    
+@import './components/card';
+@import './components/header';
+@import './components/toggle';
+@import './components/breadcrumbs';
+@import './components/toc';
+@import './components/profilebox';
+@import './components/editor';
+
+@mixin center-contents {
+  display: grid;
+  place-items: center;
+}
+
+@mixin innerBorder($size, $color) {
+  -webkit-box-shadow: inset 0px 0px 0px $size $color !important;
+  -moz-box-shadow: inset 0px 0px 0px $size $color !important;
+  box-shadow: inset 0px 0px 0px $size $color !important;
+}
+  
+@mixin font {
+  font-family: $font-family;
+  color: $font-color-dark;
+  font-size: small ;
+} 
+
+@mixin outline {
+  outline: 3px solid $outline;
+}
+
+
