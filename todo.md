@@ -1,6 +1,5 @@
 
 # Todo
-- notification box
 - horizontal bar
 - centering
 
@@ -12,8 +11,9 @@
 - crtl+save
 - autosave
 - reference/footnote
-
+- add profile template and fix shitty character template
 
 ## Done:
 - quotation
 - confirmation box (replace alert() and confirm() since it seems to break the inputs)
+- notification box

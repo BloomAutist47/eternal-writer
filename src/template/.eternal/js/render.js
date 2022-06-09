@@ -9,7 +9,6 @@ var root; // Reference to Vue App
 var projectId = ''; // Long random id of project
 var projectPath = ''; // Absolute path of project
 
-
 /**
  * Start Page.
  *
@@ -76,6 +75,7 @@ function startPage() {
        * @access     private
        */
       isElectronCheck() {
+        console.log(navigator.userAgentData);
         const userAgent = navigator.userAgent.toLowerCase();
         if (userAgent.indexOf(' electron/') == -1) { // Not electron
           console.log("Not on electron");
@@ -229,7 +229,7 @@ function startPage() {
         // Validator
         if (!this.isElectron) return;
         if (pageName === 'home') return;
-        
+
         // Deletes page from directory
         delete this.dir[pageName];
 
@@ -253,6 +253,7 @@ function startPage() {
           projectPath: projectPath,
         });
 
+        notify('success', 'Deleted Successfully', 'File is moved to trash folder.');
       },
 
       async deletePageConfirm() {
@@ -690,6 +691,31 @@ function sendToMain(name, responseName, value) {
   });
 }
 
+/**
+ * Notifies User.
+ *
+ * Creates a notification bar.
+ *
+ * @access           public
+ * @param {string}   theme   success, info, warning, error, and none.
+ * @param {string}   title   title of notify.
+ * @param {string}   message   the message str.
+ */
+function notify(theme, title, message) {
+  const myNotification = window.createNotification({
+    closeOnClick: true,
+    displayCloseButton: false,
+    positionClass: 'nfc-top-right',
+    onclick: false,
+    showDuration: 2500,
+    theme: theme
+  });
+
+  myNotification({
+    title: title,
+    message: message
+  });
+}
 
 /**
  * Get Page Data.
@@ -1066,3 +1092,6 @@ function makeid(length) {
     return result;
   }
 }
+
+
+// Notification.js
