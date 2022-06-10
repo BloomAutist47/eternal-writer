@@ -2,7 +2,7 @@
 
 // Global Variables
 var pageName = ''; // urlName of page
-var pressedKey = '';
+// var pressedKey = '';
 
 var idList = []; // ID list for the makeid() function
 var root; // Reference to Vue App
@@ -18,14 +18,14 @@ var projectPath = ''; // Absolute path of project
  * @see        TextRenderer
  */
 function startPage() {
-  document.addEventListener('keydown', (e) => {
-    if (e.code != 'ControlLeft') return;
-    pressedKey = 'ControlLeft';
-  });
+  // document.addEventListener('keydown', (e) => {
+  //   if (e.code != 'ControlLeft') return;
+  //   pressedKey = 'ControlLeft';
+  // });
 
-  document.addEventListener('keyup', (e) => {
-    pressedKey = '';
-  });
+  // document.addEventListener('keyup', (e) => {
+  //   pressedKey = '';
+  // });
 
   const app = Vue.createApp({
     data() {
@@ -209,10 +209,10 @@ function startPage() {
        */
       async gotoPage(urlName) {
 
-        if (this.isElectron !== true && pressedKey == 'ControlLeft') {
-          window.open(window.location.origin + "?p=" + urlName, '_blank').focus();
-          return;
-        }
+        // if (this.isElectron !== true && pressedKey == 'ControlLeft') {
+        //   window.open(window.location.origin + "?p=" + urlName, '_blank').focus();
+        //   return;
+        // }
 
         await this.readPage(urlName);
       },
@@ -296,7 +296,6 @@ function startPage() {
         pageName = 'new-page';
         window.history.replaceState(null, null, `?p=new-page`);
         this.clearVars();
-        console.log('Template: ', selectedTemplate);
         if (selectedTemplate == '') {
           await this.renderPage('pageNull', 'assets/new-page.html', true);
         } else {
@@ -520,7 +519,7 @@ function startPage() {
           }
         }
 
-        const textRenderer = new TextRenderer(this.dir);
+        const textRenderer = new TextRenderer(this.dir, this.isElectron);
 
         // Step 8. Add Contents to render
         content.forEach((item, index) => { // Adding them to the tab
@@ -820,7 +819,7 @@ function superTrim(text) {
  * @access     public
  */
 class TextRenderer {
-  constructor(dir) {
+  constructor(dir, isElectron) {
     this.headerConvertionTable = {
       '# ': 'h1',
       '## ': 'h2',
@@ -831,6 +830,8 @@ class TextRenderer {
     };
     this.renderTOC = false;
     this.dir = dir;
+    this.isElectron = isElectron;
+    this.footnotes = [];
   }
 
   /**
@@ -856,6 +857,7 @@ class TextRenderer {
     // Variables
     let htmlContent = ''; // Final Processed content
     var TOClist = {}; // Table of Contents
+    this.footnotes = [];
 
     for (const line of lines) {
       let value = line.trim();
@@ -874,6 +876,11 @@ class TextRenderer {
       // List
       if (value.startsWith("* ")) {
         htmlContent += `<li>${value.replace("* ", "").trim()}</li>\n`;
+        continue;
+      }
+
+      if (value.startsWith("** ")) {
+        htmlContent += `<li class="ms-4">${value.replace("** ", "").trim()}</li>\n`;
         continue;
       }
 
@@ -934,9 +941,27 @@ class TextRenderer {
       toc += `\n<a href="#${TOClist[head].id}" class="toc-${TOClist[head].h} btn-primary btn--color-tertiary">${head}</a><br>`;
     }
 
+    // Create Footnote
+    if (this.footnotes.length !== 0) {
+      toc += `\n<a href="#footnote" class="toc-H1 btn-primary btn--color-tertiary">Footnote</a><br>`;
+      let footnoteDiv = '<h1 id="footnote" class="h">Footnote<a href="#" class="arrow-up">↑</a></h1>';
+      for (const i in this.footnotes) {
+        const name = this.footnotes[i].name;
+        const link = this.footnotes[i].link;
+        console.log(link);
+        footnoteDiv += `<span id="fnb-${name}">
+        <a class="btn btn-secondary btn--link" onclick="root.gotoPage('${link}')">[${i+1}]. ${name}</a>
+        <a class="btn btn-secondary btn--link" href="#fna-${name}")">↑</a>
+        </span><br>
+        `;
+      }
+      htmlContent +=  footnoteDiv;
+    }
+
     // Adds toc to processed content
     htmlContent = htmlContent.replace("[[toc]]", `<div class="toc">${toc}</div>`);
     this.renderTOC = false;
+
 
     // Returns processed file.
     return htmlContent;
@@ -959,18 +984,28 @@ class TextRenderer {
     if (!links) return value;
 
     // Loop through found links.
-    for (const link of links) {
+    for (const _link of links) {
+      let link = _link.trim();
       if (link === '[[toc]]') continue;
+
+      let isFootnote = false;
+      // Check if link is a footnote.
+      if (link.startsWith("[[ref:")) {
+        link = link.replace("ref:", "");
+        link = link.replace(/(\[|\])/g, '').trim();
+        link = '[[' + link + ']]';
+        isFootnote = true;
+      }
 
       // Checks if link has a custom name through | division.
       let linkName = '';
       let linkDisplayName = '';
       if (link.includes('|')) {
         const rawSplit = link.split("|");
-        linkName = rawSplit[0].trim().replace(/(\[|\])/g, '').toLowerCase();
-        linkDisplayName = rawSplit[1].trim().replace(/(\[|\])/g, '');
+        linkName = rawSplit[0].replace(/(\[|\])/g, '').toLowerCase().trim();
+        linkDisplayName = rawSplit[1].replace(/(\[|\])/g, '').trim();
       } else {
-        linkName = link.trim().replace(/(\[|\])/g, '');
+        linkName = link.replace(/(\[|\])/g, '').trim();
       }
 
       // Search Directly
@@ -978,10 +1013,10 @@ class TextRenderer {
       if (this.dir.hasOwnProperty(linkNameLowered)) {
         let dirItem = this.dir[linkNameLowered];
         let name = dirItem.title;
-        if (linkDisplayName !== '') {
-          name = linkDisplayName;
-        }
-        value = value.replace(link, `<a class="btn btn-secondary btn--link" onclick="root.gotoPage('${linkNameLowered}')">${name}</a>`);
+        if (linkDisplayName !== '') name = linkDisplayName;
+
+        // add liink
+        value = this.addLink(value, _link, isFootnote, name, linkNameLowered);
         continue;
       }
 
@@ -992,22 +1027,46 @@ class TextRenderer {
         let dirItem = this.dir[pageName];
         if (dirItem.title.toLowerCase() === loweredlinkname) {
           let name = dirItem.title;
-          if (linkDisplayName !== '') {
-            name = linkDisplayName;
-          }
-          value = value.replace(link, `<a class="btn btn-secondary btn--link" onclick="root.gotoPage('${linkNameLowered}')">${name}</a>`);
-          break;
+          if (linkDisplayName !== '') name = linkDisplayName;
+          // add liink
+          value = this.addLink(value, _link, isFootnote, name, linkNameLowered);
+          continue;
         }
       }
 
       // Considers link as nonexistent and turns it red.
       let name = '';
-      if (linkDisplayName !== '') {
-        name = linkDisplayName;
+      if (linkDisplayName == '') name = link.replace(/\]/g, '').replace(/\[/g, '').trim();
+      else name = linkDisplayName;
+
+      // add liink
+      value = this.addLink(value, _link, isFootnote, name, linkNameLowered, true);
+    }
+    return value;
+  }
+
+  addLink(value, link, isFootnote,  name, linkNameLowered, isMissing=false) {
+    
+    // Check if footnote
+    if (isFootnote) {
+      this.footnotes.push({ name: name, link: linkNameLowered });
+      value = value.replace(link, `<a class="btn btn-secondary btn--link" href="#fnb-${name}" id="fna-${name}"><sup>[${this.footnotes.length}]</sup></a>`);
+    } else {
+      if (this.isElectron) {
+        if (isMissing) {
+          value = value.replace(link, `<a class="btn btn-secondary btn--link red" onclick="root.gotoPage('${linkNameLowered}')">${name}</a>`);
+        } else {
+          value = value.replace(link, `<a class="btn btn-secondary btn--link" onclick="root.gotoPage('${linkNameLowered}')">${name}</a>`);
+        }
       } else {
-        name = link.replace(/\]/g, '').replace(/\[/g, '').trim();
+        console.log(`${window.location.origin}?p=${linkNameLowered}`);
+        if (isMissing) {
+          value = value.replace(link, `<a class="btn btn-secondary btn--link red" href='${window.location.origin}?p=${linkNameLowered}'">${name}</a>`);
+        } else {
+          value = value.replace(link, `<a class="btn btn-secondary btn--link" href='${window.location.origin}?p=${linkNameLowered}'">${name}</a>`);
+        }
       }
-      value = value.replace(link, `<a class="btn btn-secondary btn--link red" onclick="root.gotoPage('${linkNameLowered}')">${name}</a>`);
+
 
     }
     return value;
