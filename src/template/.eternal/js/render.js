@@ -831,7 +831,7 @@ class TextRenderer {
     this.renderTOC = false;
     this.dir = dir;
     this.isElectron = isElectron;
-    this.footnotes = [];
+    this.references = [];
   }
 
   /**
@@ -857,7 +857,7 @@ class TextRenderer {
     // Variables
     let htmlContent = ''; // Final Processed content
     var TOClist = {}; // Table of Contents
-    this.footnotes = [];
+    this.references = [];
 
     for (const line of lines) {
       let value = line.trim();
@@ -941,21 +941,21 @@ class TextRenderer {
       toc += `\n<a href="#${TOClist[head].id}" class="toc-${TOClist[head].h} btn-primary btn--color-tertiary">${head}</a><br>`;
     }
 
-    // Create Footnote
-    if (this.footnotes.length !== 0) {
-      toc += `\n<a href="#footnote" class="toc-H1 btn-primary btn--color-tertiary">Footnote</a><br>`;
-      let footnoteDiv = '<h1 id="footnote" class="h">Footnote<a href="#" class="arrow-up">↑</a></h1>';
-      for (const i in this.footnotes) {
-        const name = this.footnotes[i].name;
-        const link = this.footnotes[i].link;
+    // Create Reference
+    if (this.references.length !== 0) {
+      toc += `\n<a href="#reference" class="toc-H1 btn-primary btn--color-tertiary">Reference</a><br>`;
+      let referenceDiv = '<h1 id="reference" class="h">Reference<a href="#" class="arrow-up">↑</a></h1>';
+      for (const i in this.references) {
+        const name = this.references[i].name;
+        const link = this.references[i].link;
         console.log(link);
-        footnoteDiv += `<span id="fnb-${name}">
-        <a class="btn btn-secondary btn--link" onclick="root.gotoPage('${link}')">[${i+1}]. ${name}</a>
-        <a class="btn btn-secondary btn--link" href="#fna-${name}")">↑</a>
+        referenceDiv += `<span id="fnb-${name}">
+        <span>${parseInt(i)+1}. </span> <a class="btn btn-secondary btn--link" href="#fna-${name}")">↑</a>
+        <a class="btn btn-secondary btn--link" onclick="root.gotoPage('${link}')">${name}</a>
         </span><br>
         `;
       }
-      htmlContent +=  footnoteDiv;
+      htmlContent +=  referenceDiv;
     }
 
     // Adds toc to processed content
@@ -988,13 +988,13 @@ class TextRenderer {
       let link = _link.trim();
       if (link === '[[toc]]') continue;
 
-      let isFootnote = false;
-      // Check if link is a footnote.
+      let isReference = false;
+      // Check if link is a reference.
       if (link.startsWith("[[ref:")) {
         link = link.replace("ref:", "");
         link = link.replace(/(\[|\])/g, '').trim();
         link = '[[' + link + ']]';
-        isFootnote = true;
+        isReference = true;
       }
 
       // Checks if link has a custom name through | division.
@@ -1016,7 +1016,7 @@ class TextRenderer {
         if (linkDisplayName !== '') name = linkDisplayName;
 
         // add liink
-        value = this.addLink(value, _link, isFootnote, name, linkNameLowered);
+        value = this.addLink(value, _link, isReference, name, linkNameLowered);
         continue;
       }
 
@@ -1029,7 +1029,7 @@ class TextRenderer {
           let name = dirItem.title;
           if (linkDisplayName !== '') name = linkDisplayName;
           // add liink
-          value = this.addLink(value, _link, isFootnote, name, linkNameLowered);
+          value = this.addLink(value, _link, isReference, name, linkNameLowered);
           continue;
         }
       }
@@ -1040,17 +1040,17 @@ class TextRenderer {
       else name = linkDisplayName;
 
       // add liink
-      value = this.addLink(value, _link, isFootnote, name, linkNameLowered, true);
+      value = this.addLink(value, _link, isReference, name, linkNameLowered, true);
     }
     return value;
   }
 
-  addLink(value, link, isFootnote,  name, linkNameLowered, isMissing=false) {
+  addLink(value, link, isReference,  name, linkNameLowered, isMissing=false) {
     
-    // Check if footnote
-    if (isFootnote) {
-      this.footnotes.push({ name: name, link: linkNameLowered });
-      value = value.replace(link, `<a class="btn btn-secondary btn--link" href="#fnb-${name}" id="fna-${name}"><sup>[${this.footnotes.length}]</sup></a>`);
+    // Check if reference
+    if (isReference) {
+      this.references.push({ name: name, link: linkNameLowered });
+      value = value.replace(link, `<a class="btn btn-secondary btn--link" href="#fnb-${name}" id="fna-${name}"><sup>[${this.references.length}]</sup></a>`);
     } else {
       if (this.isElectron) {
         if (isMissing) {
