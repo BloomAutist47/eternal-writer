@@ -180,7 +180,7 @@ ipcMain.on("toMain", async(event, value) => {
     // Create Window
     const win = new BrowserWindow({
       width: 1200,
-      height: 700,
+      height: 800,
       // autoHideMenuBar: true,
       // frame: false,
       // resizable: false,
@@ -201,7 +201,7 @@ ipcMain.on("toMain", async(event, value) => {
 
     win.loadFile(filePaths[0] + "\\" + json.main);
     win.show();
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
 
     projectPaths[json.id].mainWindow = win;
     

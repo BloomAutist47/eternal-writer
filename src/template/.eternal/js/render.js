@@ -937,6 +937,8 @@ class TextRenderer {
           if (idList.includes(id)) {
             id += makeid(5);
           }
+
+          
           htmlContent += `<${h} id="${id}" class="h">${value_}<a href="#" class="arrow-up">↑</a></${h}>\n`;
           TOClist[value_] = { id: id, h: h.toUpperCase() };
         } else {

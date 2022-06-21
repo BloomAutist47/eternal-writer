@@ -8,7 +8,7 @@ import {minify} from 'minify';
 // Location
 const pathComponent = 'src/template/.eternal/js/components/';
 const pathRender = 'src/template/.eternal/js/renders/';
-const pathSave = 'src/template/.eternal/js/main.min.js';
+const pathSave = 'src/template/.eternal/js/components.js';
 
 // Var
 var script = '/*jshint esversion: 9 */\n\n';
@@ -24,13 +24,13 @@ function ThroughDirectory(Directory) {
 
 
 
-// Combine Render
-files  = [];
-ThroughDirectory(pathRender);
-for (const file of files) {
-  const js = fs.readFileSync(file, 'utf8');
-  script += js.replace("/*jshint esversion: 9 */", "").trim() + "\n\n";
-}
+// // Combine Render
+// files  = [];
+// ThroughDirectory(pathRender);
+// for (const file of files) {
+//   const js = fs.readFileSync(file, 'utf8');
+//   script += js.replace("/*jshint esversion: 9 */", "").trim() + "\n\n";
+// }
 
 
 // Combine Components
@@ -62,7 +62,7 @@ async function minifyFile(pathSave) {
   console.log("Done");
 }
 
-minifyFile(pathSave);
+// minifyFile(pathSave);
 
 
 const pathSaveCSS = 'src/template/.eternal/css/style.css';
